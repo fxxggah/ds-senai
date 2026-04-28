@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contador com Limite</title>
+    <style>
+        body{
+            font-family: Arial, Helvetica, sans-serif;
+            background-color: rgb(70, 150, 220);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            margin-top: 80px;
+        }
+
+        #contador{
+            font-size: 3em;
+            width: 120px;
+            text-align: center;
+            padding: 10px;
+            border: 2px solid blue;
+            border-radius: 8px;
+            background-color: white;
+        }
+
+        #button{
+            padding: 10px 20px;
+            font-size: 1.2em;
+            margin: 0 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div id="contador">0</div>
+    <div id="button">
+        <button id="menos">-</button>
+        <button id="mais">+</button>
+    </div>
+
+    <script>
+        var contador = 0
+        var contagem = document.getElementById("contador")
+        var mais = document.getElementById("mais")
+        var menos = document.getElementById("menos")
+
+        function aumentar() {
+            if (contador < 10) contador++
+            contagem.innerText = contador
+        }
+
+        function diminuir() {
+            if (contador > 0) contador--
+            contagem.innerText = contador
+        }
+
+        menos.addEventListener("click", diminuir)
+        mais.addEventListener("click", aumentar)
+
+    </script>
+</body>
+</html>

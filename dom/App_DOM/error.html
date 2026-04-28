@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora Simples</title>
+</head>
+
+<body>
+    <style>
+        body {
+            font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+            background-color: #2B1464;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+
+        }
+
+        .calc {
+            background: #191B37;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px #020764;
+            text-align: center;
+
+        }
+
+        .calc button {
+            padding: 8px 12px;
+            margin: 5px;
+            cursor: pointer;
+        }
+
+        #resultado {
+            margin-top: 15px;
+            font-size: 1.4em;
+            min-height: 1.4em;
+            color: aliceblue;
+        }
+    </style>
+    </head>
+
+    <body>
+        <div class="calc">
+            <h2>Calculadora</h2>
+            <div>
+                <input id="n1" type="number">
+                <input id="n2" type="number">
+            </div>
+            <div>
+                <button id="somar">+</button>
+                <button id="subtrair">-</button>
+                <button id="dividir">/</button>
+                <button id="multiplicar">*</button>
+            </div>
+            <div id="resultado"></div>
+        </div>
+        <script>
+            var n1 = document.getElementById("n1")
+            var n2 = document.getElementById("n2")
+            var res = document.getElementById("resultado")
+
+            function somar(){
+                res.innerText= Number(n1.value)+Number(n2.value)
+            }
+
+
+            function subtrair(){
+                res.innerText = Number(n1.value)-Number(n2.value)
+            }
+
+            function dividir(){
+                res.innerText = Number(n1.value)/Number(n2.value)
+            }
+
+            function multiplicar(){
+                res.innerText = Number(n1.value)*Number(n2.value||1)
+            }
+            
+            document.getElementById("somar").addEventListener("clcik", somar)
+            document.getElementById("subtrair").addEventListener("clcik", subtrair)
+            document.getElementById("dividir").addEventListener("clcik", dividir)
+            document.getElementById("multiplicar").addEventListener("clcik", multiplicar)
+            
+        </script>
+    </body>
+
+</html>

@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+          body {
+            font-family: Arial, sans-serif;
+            background: #8fb0d7;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 60px;
+        }
+        #tarefa {
+            padding: 8px;
+            width: 250px;
+            font-size: 1rem;
+        }
+        #add {
+            padding: 8px 16px;
+            margin-left: 5px;
+            cursor: pointer;
+        }
+        #lista {
+            margin-top: 20px;
+            list-style: none;
+            padding: 0;
+            width: 300px;
+        }
+        #lista li {
+            background: white;
+            margin-bottom: 5px;
+            padding: 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            border: 1px solid #ccc;
+        }
+        #lista li:hover {
+            background: #f0f0f0;
+        }
+        small {
+            margin-top: 10px;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+    <h1>To-Do List</h1>
+    <div>
+        <input id="tarefa" placeholder="Digite uma tarefa">
+        <button id="add">Adicionar</button>
+    </div>
+    <small>Clique em um item para remover</small>
+    <ul id="lista">
+
+    </ul>
+
+    <script>
+        var input = document.getElementById("tarefa")
+        var botao = document.getElementById("add")
+        var lista = document.getElementById("lista")
+
+        function adicionar() {
+            var texto = input.value.trim()
+            if (texto === "") return
+            var li = document.createElement("li")
+            li.innerText=texto
+            lista.appendChild(li)
+            input.value=""
+            input.focus()
+        }
+
+        function remover(event) {
+            if (event.target.tagName === "LI") {
+                event.target.remove()
+            }
+        }
+
+        botao.addEventListener("click", adicionar)
+        lista.addEventListener("click", remover)
+
+    </script>
+</body>
+</html>
