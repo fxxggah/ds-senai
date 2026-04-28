@@ -1,3 +1,4 @@
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -12,56 +13,76 @@ import {
   Platform,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
-import { useState } from "react";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
-import api from "../../service/api"
+import api from "../../service/api";
+
+// 1. COMPONENTE EXTERNO PARA NÃO PERDER O FOCO
+const ProfileField = ({ label, value, onChange, isEditing }) => (
+  <View style={styles.fieldContainer}>
+    <Text style={styles.label}>{label}</Text>
+    {isEditing ? (
+      <TextInput
+        style={styles.input}
+        value={value}
+        onChangeText={onChange}
+        placeholderTextColor="#444"
+        selectionColor="#d32f2f"
+      />
+    ) : (
+      <Text style={styles.valueText}>{value || "Não informado"}</Text>
+    )}
+  </View>
+);
 
 export default function ProfileScreen() {
-  const [user, setUser] = useState([])
-
+  const [user, setUser] = useState([]);
   const [image, setImage] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
+  
+  // Estados do formulário
   const [nome, setNome] = useState("");
   const [nickname, setNickname] = useState("");
   const [idade, setIdade] = useState("");
   const [sexo, setSexo] = useState("");
   const [bio, setBio] = useState("");
 
-  const criarUsuarios = async () => {
-    try {
-      await api.post("/users", {nome})
-      Alert.alert("Usuario criado com sucesso")
-      setNome("")
-      exibirUsuarios( )
-    } catch (error) {
-      console.log("Erro: ", error)
-    }
-  }
+  // useEffect com array de dependências vazio para rodar apenas UMA VEZ
+  useEffect(() => {
+    exibirUsuarios();
+  }, []);
 
   const exibirUsuarios = async () => {
     try {
-      const response = await api.get("/users")
-      setUser(response.data)
+      const response = await api.get("/users");
+      setUser(response.data);
     } catch (error) {
-      console.log("Erro: ", error)
+      console.log("Erro ao buscar usuários: ", error);
     }
-  }
+  };
+
+  const criarUsuarios = async () => {
+    try {
+      // Aqui você pode expandir o objeto para enviar todos os campos
+      await api.post("/users", { nome, nickname, idade, sexo, bio });
+      Alert.alert("Sucesso", "Usuário criado com sucesso!");
+      setIsEditing(false);
+      exibirUsuarios();
+    } catch (error) {
+      Alert.alert("Erro", "Erro ao criar usuário.");
+      console.error(error);
+    }
+  };
 
   const pickImage = async () => {
-    const permissionResult =
-      await ImagePicker.requestMediaLibraryPermissionsAsync();
-
+    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!permissionResult.granted) {
-      Alert.alert(
-        "É necessária permissão",
-        "É preciso ter permissão para acessar a biblioteca de mídia.",
-      );
+      Alert.alert("Permissão necessária", "Precisamos de acesso às suas fotos.");
       return;
     }
 
     let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ["images"],
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
       aspect: [1, 1],
       quality: 1,
@@ -74,17 +95,13 @@ export default function ProfileScreen() {
 
   const pickPhoto = async () => {
     const permissionResult = await ImagePicker.requestCameraPermissionsAsync();
-
     if (!permissionResult.granted) {
-      Alert.alert(
-        "É necessária permissão",
-        "É preciso ter permissão para acessar a Câmera.",
-      );
+      Alert.alert("Permissão necessária", "Precisamos de acesso à câmera.");
       return;
     }
 
     let result = await ImagePicker.launchCameraAsync({
-      mediaTypes: ["images"],
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
       aspect: [1, 1],
       quality: 1,
@@ -99,26 +116,9 @@ export default function ProfileScreen() {
     setIsEditing(!isEditing);
   };
 
-  const ProfileField = ({ label, value, onChange }) => (
-    <View style={styles.fieldContainer}>
-      <Text style={styles.label}>{label}</Text>
-      {isEditing ? (
-        <TextInput
-          style={styles.input}
-          value={value}
-          onChangeText={onChange}
-          placeholderTextColor="#444"
-          selectionColor="#d32f2f"
-        />
-      ) : (
-        <Text style={styles.valueText}>{value}</Text>
-      )}
-    </View>
-  );
-
   return (
     <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
       style={styles.mainContainer}
     >
       <ScrollView
@@ -131,17 +131,29 @@ export default function ProfileScreen() {
             <Text style={styles.title}>Meu Perfil</Text>
             <Text style={styles.subtitle}>Gerencie seus dados</Text>
           </View>
-          <TouchableOpacity
-            style={[styles.miniButton, isEditing && styles.miniButtonActive]}
-            onPress={handlePress}
-          >
-            <Text style={styles.miniButtonText}>
-              {isEditing ? "Salvar" : "Editar"}
-            </Text>
-          </TouchableOpacity>
+          
+          <View style={{ flexDirection: 'row', gap: 8 }}>
+            <TouchableOpacity
+              style={[styles.miniButton, isEditing && styles.miniButtonActive]}
+              onPress={handlePress}
+            >
+              <Text style={styles.miniButtonText}>
+                {isEditing ? "Cancelar" : "Editar"}
+              </Text>
+            </TouchableOpacity>
+
+            {isEditing && (
+              <TouchableOpacity
+                style={[styles.miniButton, styles.miniButtonActive]}
+                onPress={criarUsuarios}
+              >
+                <Text style={styles.miniButtonText}>Salvar</Text>
+              </TouchableOpacity>
+            )}
+          </View>
         </View>
 
-        {/* Sessão do usuário */}
+        {/* Foto do Usuário */}
         <View style={styles.avatarWrapper}>
           <View style={styles.imageContainer}>
             {image ? (
@@ -151,24 +163,17 @@ export default function ProfileScreen() {
             )}
           </View>
 
-          {/* Botões de Ação para a Foto usando Pressable */}
           {isEditing && (
             <View style={styles.photoActionsContainer}>
               <Pressable
-                style={({ pressed }) => [
-                  styles.photoActionButton,
-                  pressed && styles.photoActionButtonPressed,
-                ]}
+                style={({ pressed }) => [styles.photoActionButton, pressed && styles.photoActionButtonPressed]}
                 onPress={pickImage}
               >
                 <FontAwesome name="photo" size={20} color="#FFF" />
               </Pressable>
 
               <Pressable
-                style={({ pressed }) => [
-                  styles.photoActionButton,
-                  pressed && styles.photoActionButtonPressed,
-                ]}
+                style={({ pressed }) => [styles.photoActionButton, pressed && styles.photoActionButtonPressed]}
                 onPress={pickPhoto}
               >
                 <AntDesign name="camera" size={20} color="#FFF" />
@@ -177,25 +182,21 @@ export default function ProfileScreen() {
           )}
         </View>
 
-        {/* Form Card */}
+        {/* Campos de Input */}
         <View style={styles.formCard}>
-          <ProfileField label="Nome Completo" value={nome} onChange={setNome} />
+          <ProfileField label="Nome Completo" value={nome} onChange={setNome} isEditing={isEditing} />
           <View style={styles.divider} />
 
-          <ProfileField
-            label="Nome de Exibição"
-            value={nickname}
-            onChange={setNickname}
-          />
+          <ProfileField label="Nome de Exibição" value={nickname} onChange={setNickname} isEditing={isEditing} />
           <View style={styles.divider} />
 
-          <ProfileField label="Idade" value={idade} onChange={setIdade} />
+          <ProfileField label="Idade" value={idade} onChange={setIdade} isEditing={isEditing} />
           <View style={styles.divider} />
 
-          <ProfileField label="Gênero" value={sexo} onChange={setSexo} />
+          <ProfileField label="Gênero" value={sexo} onChange={setSexo} isEditing={isEditing} />
           <View style={styles.divider} />
 
-          <ProfileField label="Biografia" value={bio} onChange={setBio} />
+          <ProfileField label="Biografia" value={bio} onChange={setBio} isEditing={isEditing} />
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
@@ -290,11 +291,6 @@ const styles = StyleSheet.create({
   photoActionButtonPressed: {
     backgroundColor: "#2A2A2A",
     borderColor: "#555",
-  },
-  photoActionText: {
-    color: "#FFF",
-    fontSize: 12,
-    fontWeight: "600",
   },
   formCard: {
     backgroundColor: "#111",
