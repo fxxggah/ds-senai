@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="pt-br">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Listagem | Projeto Flask</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
+  
+  <style>
+    body { background-color: #f8f9fa; }
+    .table thead { background-color: #f1f1f1; }
+    .card { border-radius: 10px; overflow: hidden; }
+  </style>
+</head>
+
+<body>
+
+  <header>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
+      <div class="container">
+        <a class="navbar-brand fw-bold" href="/">PROJETO FLASK</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav ms-auto">
+            <li class="nav-item">
+              <a class="nav-link active" href="/listar-usuarios">Usuários</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link btn btn-outline-light btn-sm ms-lg-3 px-3" href="/logout">Sair</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <main class="container mt-5">
+    <section class="row justify-content-center">
+      <div class="col-12 col-lg-10">
+
+        <div class="card border-0 shadow-sm">
+          
+          <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center border-bottom">
+            <h5 class="mb-0 text-uppercase fw-bold text-secondary">Listagem de Usuários</h5>
+            <span class="badge bg-danger rounded-pill">{{ usuarios|length }} Registros</span>
+          </div>
+
+          <div class="card-body p-0"> {% set aviso = get_flashed_messages() %}
+            {% if aviso %}
+            <div class="alert alert-info m-3 py-2 text-center" role="alert">
+              <small>{{ aviso[0] }}</small>
+            </div>
+            {% endif %}
+
+            <div class="table-responsive">
+              <table class="table table-hover mb-0">
+                <thead class="table-light">
+                  <tr>
+                    <th class="px-4 py-3">Nome do Usuário</th>
+                    <th class="py-3">CPF</th>
+                    <th class="py-3 text-center">Ações</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for usuario in usuarios %}
+                  <tr>
+                    <td class="px-4 py-3 align-middle fw-medium">{{ usuario.nome }}</td>
+                    <td class="py-3 align-middle text-muted">{{ usuario.cpf }}</td>
+                    <td class="py-3 align-middle text-center">
+                      <div class="btn-group" role="group">
+                        <a class="btn btn-outline-warning btn-sm px-3" href="{{ url_for('exibir_usuario', cpf=usuario.cpf) }}">
+                          Editar
+                        </a>
+                        <a class="btn btn-outline-danger btn-sm px-3" href="{{ url_for('excluir_usuario', cpf=usuario.cpf) }}" 
+                           onclick="return confirm('Tem certeza que deseja excluir?')">
+                          Excluir
+                        </a>
+                      </div>
+                    </td>
+                  </tr>
+                  {% else %}
+                  <tr>
+                    <td colspan="3" class="text-center py-5 text-muted">
+                      Nenhum usuário cadastrado no sistema.
+                    </td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm"
+    crossorigin="anonymous"></script>
+</body>
+
+</html>
