@@ -1,93 +1,71 @@
 <!doctype html>
 <html lang="pt-br">
-
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Login | Projeto Flask</title>
-
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet"
-        integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
-    
+    <title>Login | SaaS Platform</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* Ajuste simples para centralizar o card verticalmente */
-        body { background-color: #f8f9fa; }
-        .main-container { min-height: 80vh; display: flex; align-items: center; }
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; color: #1e293b; }
+        .main-container { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: radial-gradient(circle at top right, #fff1f2, #f8fafc); }
+        .card { border: none; border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.04), 0 8px 10px -6px rgba(0,0,0,0.04); }
+        .btn-primary { background-color: #e11d48; border: none; padding: 12px; font-weight: 600; border-radius: 8px; transition: all 0.3s; }
+        .btn-primary:hover { background-color: #be123c; transform: translateY(-1px); }
+        .form-control { border-radius: 8px; padding: 12px; border: 1px solid #e2e8f0; font-size: 0.95rem; }
+        .form-control:focus { box-shadow: 0 0 0 4px rgba(225, 29, 72, 0.1); border-color: #e11d48; }
+        .navbar { background-color: #0f172a !important; padding: 1rem 0; }
+        .brand-text { letter-spacing: -0.5px; }
     </style>
 </head>
-
 <body>
-
     <header>
-        <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
+        <nav class="navbar navbar-expand-lg navbar-dark shadow-sm">
             <div class="container">
-                <a class="navbar-brand fw-bold" href="/">PROJETO FLASK</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="collapse navbar-collapse" id="navbarNav">
-                    <ul class="navbar-nav ms-auto">
-                        <li class="nav-item">
-                            <a class="nav-link" href="/usuario">Cadastro</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link active" href="/login">Login</a>
-                        </li>
-                    </ul>
+                <a class="navbar-brand fw-bold brand-text" href="/">PROJETO<span class="text-danger">.</span>FLASK</a>
+                <div class="ms-auto">
+                    <a class="nav-link text-white-50 d-inline me-3" href="/usuario">Cadastro</a>
+                    <a class="btn btn-outline-light btn-sm px-3" href="/login">Login</a>
                 </div>
             </div>
         </nav>
     </header>
 
-    <main class="container main-container">
-        <section class="row justify-content-center w-100">
-            <div class="col-md-6 col-lg-4">
-                
-                <div class="card border-0 shadow-lg">
-                    
-                    <div class="card-header bg-danger text-white text-center py-3">
-                        <h4 class="mb-0 text-uppercase" style="letter-spacing: 1px;">Acesse sua Conta</h4>
-                    </div>
-
-                    <div class="card-body p-4">
-                        
-                        {% set aviso = get_flashed_messages() %}
-                        {% if aviso %}
-                        <div class="alert alert-warning py-2 text-center" role="alert">
-                            <small>{{ aviso[0] }}</small>
-                        </div>
-                        {% endif %}
-
-                        <form id="login" action="/validar-login" method="post">
-                            <div class="mb-3">
-                                <label for="cpf" class="form-label fw-semibold">CPF</label>
-                                <input type="text" class="form-control form-control-lg" id="cpf" name="cpf" placeholder="000.000.000-00">
-                            </div>
-
-                            <div class="mb-4">
-                                <label for="senha" class="form-label fw-semibold">Senha</label>
-                                <input type="password" class="form-control form-control-lg" id="senha" name="senha" placeholder="********">
-                            </div>
-
-                            <div class="d-grid">
-                                <button type="submit" class="btn btn-danger btn-lg shadow-sm">Entrar</button>
-                            </div>
-                        </form>
-                        
-                    </div>
-                    
-                    <div class="card-footer text-center py-3 bg-white border-0">
-                        <small class="text-muted">Não tem conta? <a href="/usuario" class="text-danger">Cadastre-se</a></small>
-                    </div>
-                </div>
-
+    <main class="main-container">
+        <div style="width: 100%; max-width: 400px; padding: 20px;">
+            <div class="text-center mb-4">
+                <h2 class="fw-bold">Bem-vindo de volta</h2>
+                <p class="text-muted">Insira suas credenciais para acessar</p>
             </div>
-        </section>
+            
+            <div class="card">
+                <div class="card-body p-4 p-md-5">
+                    {% set aviso = get_flashed_messages() %}
+                    {% if aviso %}
+                    <div class="alert alert-danger border-0 small py-2 text-center" role="alert">
+                        {{ aviso[0] }}
+                    </div>
+                    {% endif %}
+
+                    <form id="login" action="/validar-login" method="post">
+                        <div class="mb-3">
+                            <label class="form-label fw-medium small">CPF</label>
+                            <input type="text" class="form-control" id="cpf" name="cpf" placeholder="000.000.000-00">
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label fw-medium small">Senha</label>
+                            <input type="password" class="form-control" id="senha" name="senha" placeholder="••••••••">
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">Entrar na plataforma</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <p class="text-center mt-4 small text-muted">
+                Não tem uma conta? <a href="/usuario" class="text-danger fw-semibold text-decoration-none">Criar conta gratuita</a>
+            </p>
+        </div>
     </main>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm"
-        crossorigin="anonymous"></script>
 </body>
-
-</html>     
+</html>

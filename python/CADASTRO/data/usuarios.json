@@ -1,1 +1,9 @@
-[]
+[
+    {
+        "nome": "Gabriel Oliveira",
+        "nascimento": "2007-07-03",
+        "cpf": "46806265800",
+        "email": "gabrielgostoso@gmail.com",
+        "senha": "gabrieldelicia"
+    }
+]

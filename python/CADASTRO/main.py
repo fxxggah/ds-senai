@@ -9,11 +9,15 @@ app.config['SECRET_KEY'] = "SENAI791@PYTHON"
 def inicio():
     return render_template("login.html")
 
+@app.route("/usuario")
+def abrir_cadastro():
+    return render_template("cadastro-usuario.html")
+
 @app.route("/login")
 def login():
     return render_template("/login.html")
 
-@app.route("/validar-login", methodts=['post'])
+@app.route("/validar-login", methods=['post'])
 def validar_login():
     cpf = request.form.get('cpf')
     senha = request.form.get('senha')
@@ -27,7 +31,7 @@ def validar_login():
         return redirect('/login')
     return redirect('/')
 
-@app.route("/cadastrar-usuario", methodts=['post'])
+@app.route("/cadastrar-usuario", methods=['post'])
 def cadastrar_usuario():
     nome = request.form.get('nome')
     nascimento = request.form.get('nascimento')
@@ -67,17 +71,17 @@ def listar_usuarios():
         usuarios = json.load(arquivo)
     return render_template('/listagem-usuarios.html', usuarios=usuarios)
 
-@app.route("/exibir-usuario/<string: cpf>")
+@app.route("/exibir-usuario/<string:cpf>")
 def exibir_usuario(cpf):
     with open('data/usuarios.json', 'r', encoding="UTF-8") as arquivo:
         usuarios = json.load(arquivo)
     for usuario in usuarios:
-        if (usuarios[cpf] == cpf):
+        if (usuario['cpf'] == cpf):
             return render_template('/edita-usuario.html', usuario=usuario)
     flash("Usuário não encontrado.")
     return redirect('/listar-usuarios')
 
-@app.route("/editar-usuario/<string: cpf>", methods=['post'])
+@app.route("/editar-usuario/<string:cpf>", methods=['post'])
 def editar_usuario(cpf):
     nome = request.form.get('nome')
     nascimento = request.form.get('nascimento')
@@ -97,4 +101,34 @@ def editar_usuario(cpf):
         json.dump(usuarios, arquivo, indent=4)
     flash("Usuário alterado com sucesso.")
     return redirect("/listar-usuarios")
+
+@app.route("/excluir-usuario/<string:cpf>", methods=['get'])
+def excluir_usuario(cpf):
+    with open('data/usuarios.json', 'r', encoding="UTF-8") as arquivo:
+        usuarios = json.load(arquivo)
+    
+    index_usuario = None
+
+    for index, usuario in enumerate(usuarios):
+        if (usuario['cpf'] == cpf):
+            index_usuario = index
+            break
+
+    if (index_usuario is not None):
+        usuarios.pop(index_usuario)
+        
+        with open('data/usuarios.json', 'w', encoding="UTF-8") as arquivo:
+            json.dump(usuarios, arquivo, indent=4)
+
+        flash("Usuário excluído com sucesso.")
+    else:
+        flash("Não foi possível excluir o usuário.")
+    
+    return redirect("/listar-usuarios")
+@app.route("/logout")
+def logout():
+    return redirect('/')
+
+if __name__ == "__main__":
+    app.run(debug=True)
 
