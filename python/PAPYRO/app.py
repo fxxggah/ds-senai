@@ -18,29 +18,25 @@ def inicio ():
 
     return render_template('index.html')
 
-# Rota para o CADASTRAR LIVRO do website.
-@app.route('/cadastrar-livro', methods=['GET', 'POST'])
-def cadastrar_livro ():
+# Rota para o CADASTRAR produto do website.
+@app.route('/cadastrar-produto', methods=['GET', 'POST'])
+def cadastrar_produto ():
 
     # Verifica se o método da requisição é o POST.
     if (request.method == 'POST'):
 
         # Recebe os dados do formulário via POST.
-        isbn = request.form['isbn']
-        titulo = request.form['titulo']
-        autor = request.form['autor']
-        editora = request.form['editora']
-        ano = request.form['ano']
-        genero = request.form['genero']
-        edicao = request.form['edicao']
+        nome = request.form['nome']
+        dono = request.form['dono']
+        categoria = request.form['categoria']
 
         # Faz a conexão com o banco de dados.
         connection = database_connection.open_connection()
         cursor = connection.cursor()
 
         # Monta a instrução SQL e insere os dados no banco de dados.
-        SQL = "INSERT INTO livros (isbn, titulo, autor, editora, ano_publicacao, edicao, genero) VALUES (%s, %s, %s, %s, %s, %s, %s);"
-        values = (isbn, titulo, autor, editora, ano, edicao, genero)
+        SQL = "INSERT INTO produtos (nome, dono, categoria) VALUES (%s, %s, %s);"
+        values = (nome, dono, categoria)
         cursor.execute(SQL, values)
         connection.commit()
 
@@ -48,81 +44,78 @@ def cadastrar_livro ():
         cursor.close()
         connection.close()
 
-        # Redireciona para a tela de livros novamente.
-        return redirect(url_for('listar_livro'))
+        # Redireciona para a tela de produtos novamente.
+        return redirect(url_for('listar_produto'))
     else:
 
-        # Redireciona para a página de cadastro de livro.
-        return render_template('cadastrar-livro.html')
+        # Redireciona para a página de cadastro de produto.
+        return render_template('cadastrar-produto.html')
     
-# Rota para o LISTAR LIVRO do website.
-@app.route('/listar-livro')
-def listar_livro():
+# Rota para o LISTAR produto do website.
+@app.route('/listar-produto')
+def listar_produto():
 
     # Faz a conexão com o banco de dados.
     connection = database_connection.open_connection()
     cursor = connection.cursor()
 
-    # Monta a instrução SQL de seleção dos livros.
-    SQL = "SELECT isbn, titulo, genero FROM livros WHERE ativo = 1;"
+    # Monta a instrução SQL de seleção dos produtos.
+    SQL = "SELECT id, nome, dono, categoria FROM produtos WHERE ativo = 1;"
 
     # Executa a consulta SQL.
     cursor.execute(SQL)
 
     # Cria um vetor com os resultados da consulta.
-    livros = cursor.fetchall()
+    produtos = cursor.fetchall()
 
     # Fecha a conexão com o banco de dados.
     cursor.close()
     connection.close()
 
-    # Retorna a página HTML com os dados dos livros.
-    return render_template('listar-livro.html', livros=livros)
+    # Retorna a página HTML com os dados dos produtos.
+    return render_template('listar-produto.html', produtos=produtos)
 
-# Rota para o EXCLUIR LIVRO do website.
-@app.route('/excluir-livro/<isbn>')
-def excluir_livro (isbn):
+# Rota para o EXCLUIR produto do website.
+@app.route('/excluir-produto/<id>')
+def excluir_produto (id):
 
     # Faz a conexão com o banco de dados.
     connection = database_connection.open_connection()
     cursor = connection.cursor()
 
-    # Monta a instrução SQL para excluir logicamente o livro.
-    SQL = "UPDATE livros SET ativo = 0 WHERE isbn = %s;"
-    cursor.execute(SQL, (isbn,))
+    # Monta a instrução SQL para excluir logicamente o produto.
+    SQL = "UPDATE produtos SET ativo = 0 WHERE id = %s;"
+    cursor.execute(SQL, (id,))
     connection.commit()
 
     # Fecha a conexão com o banco de dados.
     cursor.close()
     connection.close()
 
-    # Redireciona para a tela de listagem de livros.
-    return redirect(url_for('listar_livro'))
+    # Redireciona para a tela de listagem de produtos.
+    return redirect(url_for('listar_produto'))
 
-# Rota para o EDITAR LIVRO do website.
-@app.route('/editar-livro', methods=['POST'])
-@app.route('/editar-livro/<isbn>', methods=['GET'])
-def editar_livro (isbn=None):
+# Rota para o EDITAR produto do website.
+@app.route('/editar-produto', methods=['POST'])
+@app.route('/editar-produto/<id>', methods=['GET'])
+def editar_produto (id=None):
 
     # Verifica se o método de requisição é POST ou GET.
     if (request.method == 'POST'):
 
         # Recebe os dados do formulário via POST.
-        isbn = request.form['isbn']
-        titulo = request.form['titulo']
-        autor = request.form['autor']
-        editora = request.form['editora']
-        ano = request.form['ano']
-        genero = request.form['genero']
-        edicao = request.form['edicao']
+        id = request.form['id']
+        nome = request.form['nome']
+        dono = request.form['dono']
+        categoria = request.form['categoria']
 
         # Faz a conexão com o banco de dados.
         connection = database_connection.open_connection()
         cursor = connection.cursor()
 
-        # Monta a instrução SQL para atualização dos dados do livro.
-        SQL = "UPDATE livros SET titulo = %s, autor = %s, editora = %s, ano_publicacao = %s, genero = %s, edicao = %s WHERE isbn = %s;"
-        values = (titulo, autor, editora, ano, genero, edicao, isbn)
+        # Monta a instrução SQL para atualização dos dados do produto.
+        SQL = "UPDATE produtos SET nome = %s, dono = %s, categoria = %s WHERE id = %s;"
+        values = (nome, dono, categoria, id)
         cursor.execute(SQL, values)
         connection.commit()
 
@@ -130,8 +123,8 @@ def editar_livro (isbn=None):
         cursor.close()
         connection.close()
 
-        # Redireciona para a tela de livros novamente.
-        return redirect(url_for('listar_livro'))
+        # Redireciona para a tela de produtos novamente.
+        return redirect(url_for('listar_produto'))
     
     else:
 
@@ -139,21 +132,21 @@ def editar_livro (isbn=None):
         connection = database_connection.open_connection()
         cursor = connection.cursor()
 
-        # Monta a instrução SQL para trazer os dados do livro.
-        SQL = "SELECT isbn, titulo, autor, editora, ano_publicacao, genero, edicao FROM livros WHERE isbn = %s;"
-        cursor.execute(SQL, (isbn,))
-        livro = cursor.fetchone()
+        # Monta a instrução SQL para trazer os dados do produto.
+        SQL = "SELECT id, nome, dono, categoria FROM produtos WHERE id = %s;"
+        cursor.execute(SQL, (id,))
+        produto = cursor.fetchone()
 
         # Fecha a conexão com o banco de dados.
         cursor.close()
         connection.close()
 
-        # Redireciona para a tela de edição do livro.
-        return render_template('editar-livro.html', livro=livro)
+        # Redireciona para a tela de edição do produto.
+        return render_template('editar-produto.html', produto=produto)
 
-# Rota para o CADASTRAR LEITOR do website.
-@app.route('/cadastrar-leitor', methods=['GET', 'POST'])
-def cadastrar_leitor ():
+# Rota para o CADASTRAR cliente do website.
+@app.route('/cadastrar-cliente', methods=['GET', 'POST'])
+def cadastrar_cliente ():
 
     # Verifica se o método da requisição é o POST.
     if (request.method == 'POST'):
@@ -170,7 +163,7 @@ def cadastrar_leitor ():
         cursor = connection.cursor()
 
         # Monta a instrução SQL e insere os dados no banco de dados.
-        SQL = "INSERT INTO leitores (cpf, nome, endereco, telefone, email) VALUES (%s, %s, %s, %s, %s);"
+        SQL = "INSERT INTO clientes (cpf, nome, endereco, telefone, email) VALUES (%s, %s, %s, %s, %s);"
         values = (cpf, nome, endereco, telefone, email)
         cursor.execute(SQL, values)
         connection.commit()
@@ -179,47 +172,47 @@ def cadastrar_leitor ():
         cursor.close()
         connection.close()
 
-        # Redireciona para a tela de leitores novamente.
-        return redirect(url_for('listar_leitor'))
+        # Redireciona para a tela de clientes novamente.
+        return redirect(url_for('listar_cliente'))
     else:
          
-        # Redireciona para a página de cadastro de leitor.
-        return render_template('cadastrar-leitor.html')
+        # Redireciona para a página de cadastro de cliente.
+        return render_template('cadastrar-cliente.html')
 
-# Rota para o LISTAR LEITOR do website.
-@app.route('/listar-leitor')
-def listar_leitor():
+# Rota para o LISTAR cliente do website.
+@app.route('/listar-cliente')
+def listar_cliente():
 
     # Faz a conexão com o banco de dados.
     connection = database_connection.open_connection()
     cursor = connection.cursor()
 
-    # Monta a instrução SQL de seleção dos leitores.
-    SQL = "SELECT cpf, nome, email FROM leitores WHERE ativo = 1;"
+    # Monta a instrução SQL de seleção dos clientes.
+    SQL = "SELECT cpf, nome, email FROM clientes WHERE ativo = 1;"
 
     # Executa a consulta SQL.
     cursor.execute(SQL)
 
     # Cria um vetor com os resultados da consulta.
-    leitores = cursor.fetchall()
+    clientes = cursor.fetchall()
 
     # Fecha a conexão com o banco de dados.
     cursor.close()
     connection.close()
 
-    # Retorna a página HTML com os dados dos leitores.
-    return render_template('listar-leitor.html', leitores=leitores)
+    # Retorna a página HTML com os dados dos clientes.
+    return render_template('listar-cliente.html', clientes=clientes)
 
-# Rota para o EXCLUIR LEITOR do website.
-@app.route('/excluir-leitor/<cpf>')
-def excluir_leitor (cpf):
+# Rota para o EXCLUIR cliente do website.
+@app.route('/excluir-cliente/<cpf>')
+def excluir_cliente (cpf):
 
     # Faz a conexão com o banco de dados.
     connection = database_connection.open_connection()
     cursor = connection.cursor()
 
-    # Monta a instrução SQL para excluir logicamente o leitor.
-    SQL = "UPDATE leitores SET ativo = 0 WHERE cpf = %s;"
+    # Monta a instrução SQL para excluir logicamente o cliente.
+    SQL = "UPDATE clientes SET ativo = 0 WHERE cpf = %s;"
     cursor.execute(SQL, (cpf,))
     connection.commit()
 
@@ -227,13 +220,13 @@ def excluir_leitor (cpf):
     cursor.close()
     connection.close()
 
-    # Redireciona para a tela de listagem de leitores.
-    return redirect(url_for('listar_leitor'))
+    # Redireciona para a tela de listagem de clientes.
+    return redirect(url_for('listar_cliente'))
 
-# Rota para o EDITAR LEITOR do website.
-@app.route('/editar-leitor', methods=['POST'])
-@app.route('/editar-leitor/<cpf>', methods=['GET'])
-def editar_leitor (cpf=None):
+# Rota para o EDITAR cliente do website.
+@app.route('/editar-cliente', methods=['POST'])
+@app.route('/editar-cliente/<cpf>', methods=['GET'])
+def editar_cliente (cpf=None):
 
     # Verifica se o método de requisição é POST ou GET.
     if (request.method == 'POST'):
@@ -249,8 +242,8 @@ def editar_leitor (cpf=None):
         connection = database_connection.open_connection()
         cursor = connection.cursor()
 
-        # Monta a instrução SQL para atualização dos dados do leitor.
-        SQL = "UPDATE leitores SET nome = %s, endereco = %s, telefone = %s, email = %s WHERE cpf = %s;"
+        # Monta a instrução SQL para atualização dos dados do cliente.
+        SQL = "UPDATE clientes SET nome = %s, endereco = %s, telefone = %s, email = %s WHERE cpf = %s;"
         values = (nome, endereco, telefone, email, cpf)
         cursor.execute(SQL, values)
         connection.commit()
@@ -259,8 +252,8 @@ def editar_leitor (cpf=None):
         cursor.close()
         connection.close()
 
-        # Redireciona para a tela de leitores novamente.
-        return redirect(url_for('listar_leitor'))
+        # Redireciona para a tela de clientes novamente.
+        return redirect(url_for('listar_cliente'))
     
     else:
 
@@ -268,19 +261,19 @@ def editar_leitor (cpf=None):
         connection = database_connection.open_connection()
         cursor = connection.cursor()
 
-        # Monta a instrução SQL para trazer os dados do leitor.
-        SQL = "SELECT cpf, nome, endereco, telefone, email FROM leitores WHERE cpf = %s;"
+        # Monta a instrução SQL para trazer os dados do cliente.
+        SQL = "SELECT cpf, nome, endereco, telefone, email FROM clientes WHERE cpf = %s;"
         cursor.execute(SQL, (cpf,))
-        leitor = cursor.fetchone()
+        cliente = cursor.fetchone()
 
         # Fecha a conexão com o banco de dados.
         cursor.close()
         connection.close()
 
-        # Redireciona para a tela de edição do leitor.
-        return render_template('editar-leitor.html', leitor=leitor)
+        # Redireciona para a tela de edição do cliente.
+        return render_template('editar-cliente.html', cliente=cliente)
 
-# Rota de REALIZAÇÃO DO EMPRÉSTIMO DO LIVRO do website.
+# Rota de REALIZAÇÃO DO EMPRÉSTIMO DO produto do website.
 @app.route('/realizar-emprestimo', methods=['GET', 'POST'])
 def realizar_emprestimo():
 
@@ -289,7 +282,7 @@ def realizar_emprestimo():
 
         # Recebe os dados do formulário via POST.
         cpf = request.form['cpf']
-        isbn = request.form['isbn']
+        id = request.form['id']
         data_emprestimo = request.form['data-emprestimo']
         data_devolucao = request.form['data-devolucao']
 
@@ -298,8 +291,8 @@ def realizar_emprestimo():
         cursor = connection.cursor()
 
         # Monta a instrução SQL e insere os dados no banco de dados.
-        SQL = "INSERT INTO emprestimos (cpf_leitor, isbn_livro, data_emprestimo, data_devolucao) VALUES (%s, %s, %s, %s);"
-        values = (cpf, isbn, data_emprestimo, data_devolucao)
+        SQL = "INSERT INTO emprestimos (cpf_cliente, id_produto, data_emprestimo, data_devolucao) VALUES (%s, %s, %s, %s);"
+        values = (cpf, id, data_emprestimo, data_devolucao)
         cursor.execute(SQL, values)
         connection.commit()
 
@@ -314,7 +307,7 @@ def realizar_emprestimo():
         # Redireciona para a página de realização de empréstimo.
         return render_template('realizar-emprestimo.html')
 
-# Rota para o LISTAR EMPRÉSTIMO DO LIVRO do website.
+# Rota para o LISTAR EMPRÉSTIMO DO produto do website.
 @app.route('/listar-emprestimo')
 def listar_emprestimo ():
 
@@ -323,7 +316,7 @@ def listar_emprestimo ():
     cursor = connection.cursor()
 
     # Monta a instrução SQL para selecionar os empréstimos.
-    SQL = "SELECT id, cpf_leitor, isbn_livro, data_devolucao FROM emprestimos WHERE ativo = 1;"
+    SQL = "SELECT id, cpf_cliente, id_produto, data_devolucao FROM emprestimos WHERE ativo = 1;"
 
     # Executa a consulta SQL.
     cursor.execute(SQL)
@@ -338,7 +331,7 @@ def listar_emprestimo ():
     # Retorna a página HTML com os dados dos empréstimos.
     return render_template('listar-emprestimo.html', emprestimos=emprestimos)
 
-# Rota para o EXCLUIR EMPRÉSTIMO DO LIVRO do website.
+# Rota para o EXCLUIR EMPRÉSTIMO DO produto do website.
 @app.route('/excluir-emprestimo/<id>')
 def excluir_emprestimo (id):
 
@@ -358,7 +351,7 @@ def excluir_emprestimo (id):
     # Redireciona para a tela de empréstimos novamente.
     return redirect(url_for('listar_emprestimo'))
 
-# Rota para o EDITAR EMPRÉSTIMO DO LIVRO do website.
+# Rota para o EDITAR EMPRÉSTIMO DO produto do website.
 @app.route('/editar-emprestimo', methods=['POST'])
 @app.route('/editar-emprestimo/<id>', methods=['GET'])
 def editar_emprestimo (id=None):
@@ -369,7 +362,7 @@ def editar_emprestimo (id=None):
         # Recebe os dados do formulário via POST.
         id = request.form['id']
         cpf = request.form['cpf']
-        isbn = request.form['isbn']
+        id = request.form['id']
         data_emprestimo = request.form['data-emprestimo']
         data_devolucao = request.form['data-devolucao']
 
@@ -378,8 +371,8 @@ def editar_emprestimo (id=None):
         cursor = connection.cursor()
 
         # Monta a instrução SQL para atualização dos dados do empréstimo.
-        SQL = "UPDATE emprestimos SET cpf_leitor = %s, isbn_livro = %s, data_emprestimo = %s, data_devolucao = %s WHERE id = %s;"
-        values = (cpf, isbn, data_emprestimo, data_devolucao, id)
+        SQL = "UPDATE emprestimos SET cpf_cliente = %s, id_produto = %s, data_emprestimo = %s, data_devolucao = %s WHERE id = %s;"
+        values = (cpf, id, data_emprestimo, data_devolucao, id)
         cursor.execute(SQL, values)
         connection.commit()
 
@@ -397,7 +390,7 @@ def editar_emprestimo (id=None):
         cursor = connection.cursor()
 
         # Monta a instrução SQL para trazer os dados do empréstimo.
-        SQL = "SELECT id, cpf_leitor, isbn_livro, data_emprestimo, data_devolucao FROM emprestimos WHERE id = %s;"
+        SQL = "SELECT id, cpf_cliente, id_produto, data_emprestimo, data_devolucao FROM emprestimos WHERE id = %s;"
         cursor.execute(SQL, (id,))
         emprestimo = cursor.fetchone()
 
@@ -410,3 +403,5 @@ def editar_emprestimo (id=None):
 
 if __name__ == '__main__':
     app.run(debug=True)
+
+print("Flask está ok!")
