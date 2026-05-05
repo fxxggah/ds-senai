@@ -1,16 +1,55 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Imagens em BS5</title>
-    <link
-    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
-    rel="stylesheet"
-    integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB"
-    crossorigin="anonymous">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+    <style>
+        img {
+            width: 200px;
+            height: 200px;
+        }
+    </style>
 </head>
+
 <body>
-    
+    <div class="container-fluid">
+        <h1 class="text-center bg-danger text-white">Guia Prático: Imagens no Bootstrap 5</h1>
+        <!--- FORMAS DE IMAGEM ---->
+        <section>
+            <h2>Formas de Imagens</h2>
+            <div class="row">
+                <div class="col-sm-4">
+                    <p>imagem com cantos arredondados:</p>
+                    <img src="imagem1.jpg" class="rounded" alt="luis-fabiano">
+                </div>
+                <div class="col-sm-4">
+                    <p>Imagem Circular</p>
+                    <img src="imagem2.jpg" class="rounded-circle" alt="mineiro">
+                    <img src="imagem3.jpg" class="rounded-circle" alt="kaka">
+                </div>
+                <div class="col-sm-4">
+                    <p>Imagem em Miniatura</p>
+                    <img src="imagem4.jpg" class="img-thumbnail" alt="rogerio-ceni">
+                    <img src="imagem5.jpg" class="img-thumbnail" alt="rai">
+                </div>
+            </div>
+        </section>
+        <!--- FORMAS DE IMAGEM ---->
+        <section>
+            <h2>Alinhamento de Imagens</h2>
+            <p>Imagens à esqueda e à direita</p>
+            <img src="imagem1.jpg" class="float-start" alt="luis-fabiano">
+            <img src="imagem2.jpg" class="float-end" alt="luis-fabiano">
+            <div class="text-center">
+                <p>Centralizar a IMAGEM</p>
+                <img src="imagem3.jpg" class="mx-auto d-block" alt="kaka">
+            </div>
+        </section>
+    </div>
 </body>
+
 </html>
