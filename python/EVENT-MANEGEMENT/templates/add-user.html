@@ -3,14 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Acesso | SGE</title>
+    <title>Criar Conta | SGE</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
             --primary: #6366f1;
-            --bg: #0f172a; /* Fundo dark profundo para ar premium */
+            --primary-hover: #4f46e5;
+            --bg: #0f172a;
         }
 
         body { 
@@ -72,7 +73,7 @@
             box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
         }
 
-        button { 
+        .btn-register { 
             width: 100%; 
             padding: 14px; 
             background: var(--primary); 
@@ -82,10 +83,12 @@
             cursor: pointer; 
             font-size: 1rem;
             font-weight: 600;
-            transition: opacity 0.2s;
+            transition: background 0.2s;
         }
 
-        button:hover { opacity: 0.9; }
+        .btn-register:hover { 
+            background: var(--primary-hover); 
+        }
 
         .footer-link {
             text-align: center;
@@ -94,26 +97,47 @@
             color: #64748b;
         }
         
-        .footer-link a { color: var(--primary); text-decoration: none; font-weight: 600; }
+        .footer-link a { 
+            color: var(--primary); 
+            text-decoration: none; 
+            font-weight: 600; 
+        }
+
+        .badge {
+            display: inline-block;
+            background: #e0e7ff;
+            color: #4338ca;
+            padding: 4px 12px;
+            border-radius: 99px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            margin-bottom: 16px;
+            text-transform: uppercase;
+        }
+
+        .text-center { text-align: center; }
     </style>
 </head>
 <body>
     <div class="box">
-        <h2>Bem-vindo de volta</h2>
-        <p>Insira suas credenciais para acessar o SGE</p>
+        <div class="text-center">
+            <span class="badge">Novo Usuário</span>
+        </div>
+        <h2>Criar sua conta</h2>
+        <p>Junte-se à plataforma de gestão de eventos</p>
         
-        <form action="/login" method="POST">
-            <label for="username">Usuário</label>
-            <input type="text" id="username" name="username" placeholder="Seu nome de usuário" required>
+        <form action="/register" method="POST">
+            <label for="username">Escolha um usuário</label>
+            <input type="text" id="username" name="username" placeholder="ex: joao_silva" required>
             
-            <label for="password">Senha</label>
+            <label for="password">Defina uma senha</label>
             <input type="password" id="password" name="password" placeholder="••••••••" required>
             
-            <button type="submit">Entrar na plataforma</button>
+            <button type="submit" class="btn-register">Finalizar Cadastro</button>
         </form>
 
         <div class="footer-link">
-            Não tem uma conta? <a href="/register">Criar uma conta</a>
+            Já possui uma conta? <a href="/login">Fazer Login</a>
         </div>
     </div>
 </body>

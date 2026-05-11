@@ -75,5 +75,25 @@ def cadastrar():
     conn.close()
     return redirect(url_for('index'))
 
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    if request.method == 'POST':
+        usuario = request.form['username']
+        senha = request.form['password']
+
+        try:
+            conn = get_db_connection()
+            cursor = conn.cursor()
+            # Inserindo na tabela 'usuarios' que você confirmou que existe
+            cursor.execute('INSERT INTO usuarios (username, senha) VALUES (%s, %s)', (usuario, senha))
+            conn.commit()
+            cursor.close()
+            conn.close()
+            return redirect(url_for('login'))
+        except mysql.connector.Error as err:
+            return f"Erro ao criar usuário: {err} <a href='/register'>Tentar novamente</a>"
+
+    return render_template('add-user.html')
+
 if __name__=='__main__':
     app.run(debug=True)
