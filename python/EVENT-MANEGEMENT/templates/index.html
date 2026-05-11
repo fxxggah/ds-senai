@@ -3,19 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard | Gestão de Eventos</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <title>Dashboard | SGE</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
             --primary: #6366f1;
-            --primary-hover: #4f46e5;
-            --bg: #f8fafc;
-            --card-bg: #ffffff;
-            --text-main: #1e293b;
-            --text-muted: #64748b;
-            --border: #e2e8f0;
+            --bg: #020617;
+            --card-bg: #0f172a;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border: rgba(255, 255, 255, 0.08);
+            --accent-gradient: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -24,160 +22,208 @@
             font-family: 'Inter', sans-serif; 
             background-color: var(--bg); 
             color: var(--text-main);
-            line-height: 1.5;
-            padding: 40px 20px;
+            padding: 60px 20px;
+            line-height: 1.6;
         }
 
         .container { 
-            max-width: 900px; 
+            max-width: 1000px; 
             margin: auto; 
+            animation: fadeIn 1s ease-out;
         }
 
-        /* Header Estilo SaaS */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Header SaaS Premium */
         .header { 
             display: flex; 
             justify-content: space-between; 
-            align-items: center; 
-            margin-bottom: 40px;
+            align-items: flex-end; 
+            margin-bottom: 60px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 24px;
         }
 
-        .header h1 { font-size: 1.5rem; font-weight: 700; color: var(--text-main); }
+        .header h1 { 
+            font-size: 2rem; 
+            font-weight: 700; 
+            letter-spacing: -0.04em;
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
         
-        .user-info { font-size: 0.9rem; color: var(--text-muted); }
-        .user-info strong { color: var(--text-main); }
+        .user-info { font-size: 0.9rem; color: var(--text-muted); display: flex; align-items: center; gap: 16px; }
+        .user-info strong { color: var(--text-main); font-weight: 600; }
         
         .logout { 
-            margin-left: 15px;
-            color: #ef4444; 
+            color: #fb7185; 
             text-decoration: none; 
             font-weight: 600;
-            padding: 6px 12px;
-            border-radius: 6px;
-            transition: background 0.2s;
+            padding: 8px 16px;
+            border-radius: 10px;
+            background: rgba(251, 113, 133, 0.1);
+            transition: all 0.3s;
         }
-        .logout:hover { background: #fee2e2; }
+        .logout:hover { background: rgba(251, 113, 133, 0.2); transform: scale(1.05); }
 
-        /* Card de Cadastro */
+        /* Glassmorphism Form */
         .form-add { 
             background: var(--card-bg); 
-            padding: 30px; 
-            border-radius: 12px; 
+            padding: 32px; 
+            border-radius: 20px; 
             border: 1px solid var(--border);
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-            margin-bottom: 40px; 
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            margin-bottom: 60px; 
+            position: relative;
         }
 
-        .form-add h3 { margin-bottom: 20px; font-size: 1.1rem; font-weight: 600; }
+        .form-add h3 { margin-bottom: 24px; font-size: 1.25rem; font-weight: 600; }
 
         .grid-inputs {
             display: grid;
             grid-template-columns: 2fr 1fr;
-            gap: 15px;
+            gap: 20px;
         }
 
         input, textarea { 
             width: 100%; 
-            padding: 12px 16px; 
-            margin-bottom: 15px; 
+            padding: 14px 18px; 
+            margin-bottom: 20px; 
+            background: rgba(255,255,255,0.03);
             border: 1px solid var(--border); 
-            border-radius: 8px; 
+            border-radius: 12px; 
+            color: white;
             font-family: inherit;
             font-size: 0.95rem;
-            transition: border-color 0.2s, box-shadow 0.2s;
+            transition: all 0.3s;
         }
 
         input:focus, textarea:focus {
             outline: none;
             border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+            background: rgba(255,255,255,0.06);
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
         }
 
         .btn-submit { 
-            background: var(--primary); 
+            background: var(--accent-gradient); 
             color: white; 
             border: none; 
-            padding: 12px 24px; 
+            padding: 16px; 
             cursor: pointer; 
-            border-radius: 8px; 
+            border-radius: 12px; 
             font-weight: 600;
             width: 100%;
-            transition: background 0.2s;
+            transition: all 0.3s;
+            box-shadow: 0 10px 20px rgba(99, 102, 241, 0.2);
         }
-        .btn-submit:hover { background: var(--primary-hover); }
+        .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 15px 30px rgba(99, 102, 241, 0.3); }
 
-        /* Lista de Eventos */
-        h2 { font-size: 1.25rem; margin-bottom: 20px; color: var(--text-main); }
+        /* Event Cards */
+        h2 { font-size: 1.5rem; margin-bottom: 30px; letter-spacing: -0.02em; font-weight: 700; }
+
+        .event-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 24px;
+        }
 
         .event-card { 
             background: var(--card-bg); 
-            padding: 20px; 
-            margin-bottom: 16px; 
-            border-radius: 12px;
+            padding: 28px; 
+            border-radius: 20px;
             border: 1px solid var(--border);
-            transition: transform 0.2s, box-shadow 0.2s;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .event-card::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; width: 4px; height: 100%;
+            background: var(--accent-gradient);
+            opacity: 0;
+            transition: 0.3s;
         }
 
         .event-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 30px 60px rgba(0,0,0,0.5);
+            border-color: rgba(255,255,255,0.2);
         }
 
-        .event-card strong { font-size: 1.1rem; color: var(--text-main); display: block; margin-bottom: 4px; }
+        .event-card:hover::before { opacity: 1; }
+
+        .event-card strong { font-size: 1.2rem; color: var(--text-main); display: block; margin-bottom: 8px; }
         
         .event-meta { 
             font-size: 0.85rem; 
             color: var(--primary); 
-            font-weight: 500;
-            margin-bottom: 12px;
+            font-weight: 600;
+            margin-bottom: 16px;
             display: flex;
-            gap: 15px;
+            flex-wrap: wrap;
+            gap: 12px;
         }
 
-        .event-card p { color: var(--text-muted); font-size: 0.95rem; }
+        .event-meta span {
+            background: rgba(99, 102, 241, 0.1);
+            padding: 4px 10px;
+            border-radius: 6px;
+        }
 
-        .empty-state { text-align: center; color: var(--text-muted); padding: 40px; }
+        .event-card p { color: var(--text-muted); font-size: 0.9rem; line-height: 1.5; }
+
+        .empty-state { text-align: center; color: var(--text-muted); padding: 80px; border: 2px dashed var(--border); border-radius: 20px; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <div class="header">
-        <h1>Meus Eventos</h1>
+        <h1>Dashboard</h1>
         <div class="user-info">
-            Olá, <strong>{{ user }}</strong>! 
+            Olá, <strong>{{ user }}</strong>
             <a href="/logout" class="logout">Sair</a>
         </div>
     </div>
 
     <div class="form-add">
-        <h3>Criar novo evento</h3>
+        <h3>Agendar Novo Evento</h3>
         <form action="/cadastrar" method="POST">
             <div class="grid-inputs">
-                <input type="text" name="titulo" placeholder="Título do Evento" required>
+                <input type="text" name="titulo" placeholder="Nome do evento" required>
                 <input type="date" name="data" required>
             </div>
-            <input type="text" name="local" placeholder="Local ou Link da Reunião">
-            <textarea name="descricao" rows="3" placeholder="Breve descrição do evento..."></textarea>
-            <button type="submit" class="btn-submit">Agendar Evento</button>
+            <input type="text" name="local" placeholder="Localização física ou URL do Zoom/Meet">
+            <textarea name="descricao" rows="3" placeholder="Detalhes e objetivos do evento..."></textarea>
+            <button type="submit" class="btn-submit">Confirmar Agendamento</button>
         </form>
     </div>
 
-    <h2>Próximos Eventos</h2>
+    <h2>Seus Eventos Ativos</h2>
     
-    {% for ev in eventos %}
-    <div class="event-card">
-        <strong>{{ ev.titulo }}</strong>
-        <div class="event-meta">
-            <span>📅 {{ ev.data_evento }}</span>
-            <span>📍 {{ ev.local_evento or 'Remoto' }}</span>
+    <div class="event-grid">
+        {% for ev in eventos %}
+        <div class="event-card">
+            <strong>{{ ev.titulo }}</strong>
+            <div class="event-meta">
+                <span>📅 {{ ev.data_evento }}</span>
+                <span>📍 {{ ev.local_evento or 'Remoto' }}</span>
+            </div>
+            <p>{{ ev.descricao }}</p>
         </div>
-        <p>{{ ev.descricao }}</p>
+        {% else %}
+        <div class="empty-state">
+            <p>Sua agenda está livre. Comece criando um evento acima.</p>
+        </div>
+        {% endfor %}
     </div>
-    {% else %}
-    <div class="empty-state">
-        <p>Você ainda não tem eventos agendados.</p>
-    </div>
-    {% endfor %}
 </div>
 
 </body>

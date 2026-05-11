@@ -3,117 +3,178 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Acesso | SGE</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <title>Acesso Premium | SGE</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
             --primary: #6366f1;
-            --bg: #0f172a; /* Fundo dark profundo para ar premium */
+            --primary-glow: rgba(99, 102, 241, 0.5);
+            --bg: #020617;
+            --glass: rgba(15, 23, 42, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent-gradient: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
         }
+
+        @keyframes mesh {
+            0% { transform: translate(0,0); }
+            50% { transform: translate(10px, 15px); }
+            100% { transform: translate(0,0); }
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; cursor: default; }
 
         body { 
             font-family: 'Inter', sans-serif; 
-            background: var(--bg); 
+            background: var(--bg);
+            color: var(--text-main);
             height: 100vh; 
             display: flex; 
             justify-content: center; 
             align-items: center; 
-            margin: 0; 
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Background Animado SaaS */
+        body::before {
+            content: "";
+            position: absolute;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, var(--primary-glow) 0%, transparent 70%);
+            top: -10%; left: -10%;
+            filter: blur(80px);
+            animation: mesh 8s infinite alternate ease-in-out;
+            z-index: 0;
         }
 
         .box { 
-            background: white; 
-            padding: 48px 40px; 
-            border-radius: 16px; 
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); 
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            padding: 48px; 
+            border-radius: 24px; 
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8); 
             width: 100%;
-            max-width: 400px; 
+            max-width: 420px; 
+            z-index: 10;
+            animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative;
         }
 
-        .box h2 { 
-            text-align: center; 
-            color: #1e293b; 
-            font-size: 1.75rem;
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .badge {
+            display: inline-block;
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            color: var(--primary);
+            padding: 6px 14px;
+            border-radius: 99px;
+            font-size: 0.7rem;
             font-weight: 700;
-            margin-bottom: 8px;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            margin-bottom: 24px;
         }
 
-        .box p {
-            text-align: center;
-            color: #64748b;
-            font-size: 0.9rem;
-            margin-bottom: 32px;
-        }
+        h2 { font-size: 2rem; font-weight: 700; margin-bottom: 8px; letter-spacing: -0.02em; }
+        p { color: var(--text-muted); font-size: 0.95rem; margin-bottom: 32px; font-weight: 300; }
 
-        label {
-            display: block;
-            font-size: 0.85rem;
-            font-weight: 600;
-            color: #475569;
-            margin-bottom: 6px;
-        }
+        label { display: block; font-size: 0.8rem; font-weight: 500; color: var(--text-muted); margin-bottom: 8px; margin-left: 4px;}
 
         input { 
             width: 100%; 
-            padding: 12px; 
+            padding: 14px 18px; 
             margin-bottom: 20px; 
-            border: 1px solid #e2e8f0; 
-            border-radius: 8px; 
-            box-sizing: border-box; 
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--glass-border); 
+            border-radius: 12px; 
+            color: white;
             font-size: 1rem;
-            transition: all 0.2s;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: text;
         }
 
         input:focus {
             outline: none;
+            background: rgba(255,255,255,0.07);
             border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15);
+            transform: scale(1.01);
         }
 
-        button { 
+        .btn-premium { 
             width: 100%; 
-            padding: 14px; 
-            background: var(--primary); 
+            padding: 16px; 
+            background: var(--accent-gradient); 
             color: white; 
             border: none; 
-            border-radius: 8px; 
+            border-radius: 12px; 
             cursor: pointer; 
             font-size: 1rem;
             font-weight: 600;
-            transition: opacity 0.2s;
+            box-shadow: 0 10px 20px -5px rgba(99, 102, 241, 0.4);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
         }
 
-        button:hover { opacity: 0.9; }
+        .btn-premium:hover { 
+            transform: translateY(-2px);
+            box-shadow: 0 15px 30px -5px rgba(99, 102, 241, 0.6);
+            filter: brightness(1.1);
+        }
+
+        .btn-premium:active { transform: translateY(0); }
 
         .footer-link {
             text-align: center;
-            margin-top: 24px;
+            margin-top: 32px;
             font-size: 0.85rem;
-            color: #64748b;
+            color: var(--text-muted);
         }
         
-        .footer-link a { color: var(--primary); text-decoration: none; font-weight: 600; }
+        .footer-link a { 
+            color: var(--text-main); 
+            text-decoration: none; 
+            font-weight: 600; 
+            padding-bottom: 2px;
+            border-bottom: 1px solid var(--glass-border);
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        .footer-link a:hover { border-color: var(--primary); color: var(--primary); }
+
+        .text-center { text-align: center; }
     </style>
 </head>
 <body>
     <div class="box">
-        <h2>Bem-vindo de volta</h2>
-        <p>Insira suas credenciais para acessar o SGE</p>
+        <div class="text-center">
+            <span class="badge">SGE Enterprise</span>
+        </div>
+        <h2>Acesso à Plataforma</h2>
+        <p>Bem-vindo ao futuro da gestão de eventos.</p>
         
         <form action="/login" method="POST">
-            <label for="username">Usuário</label>
-            <input type="text" id="username" name="username" placeholder="Seu nome de usuário" required>
+            <label>NOME DE USUÁRIO</label>
+            <input type="text" name="username" placeholder="seu_usuario" required>
             
-            <label for="password">Senha</label>
-            <input type="password" id="password" name="password" placeholder="••••••••" required>
+            <label>SENHA</label>
+            <input type="password" name="password" placeholder="••••••••" required>
             
-            <button type="submit">Entrar na plataforma</button>
+            <button type="submit" class="btn-premium">Entrar na plataforma</button>
         </form>
 
         <div class="footer-link">
-            Não tem uma conta? <a href="/register">Criar uma conta</a>
+            Não tem uma conta? <a href="/register">Cadastre-se</a>
         </div>
     </div>
 </body>
