@@ -1,0 +1,71 @@
+from flask import Flask, render_template, request, redirect, url_for, session
+import mysql.connector
+
+app = Flask(__name__)
+
+def get_db_connection():
+    return mysql.connector.connect(
+        host = 'localhost',
+        user = 'root',
+        password = 'dev@2025',
+        database = 'gestao_eventos'
+    )
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        usuario = request.form['username']
+        senha = request.form['password']
+
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute('SELECT * FROM usuarios WHERE username = %s AND senha = %s', (usuario, senha))
+        user = cursor.fetchone()
+        cursor.close()
+        conn.close()
+
+        if user:
+            session['logado'] = True
+            session['username'] = user ['username']
+            return redirect(url_for('index')) 
+        else:
+            return "Erro : usuario ou senha incorretas <a href='login'>Tentar Novamente</a>"
+    return render_template('login.html')
+
+@app.route('/logout')
+def logout():
+    session.clear()
+    return redirect(url_for('login'))
+
+@app.route('/')
+def index():
+    if not session.get('logado'):
+        return redirect(url_for('login'))
+    
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute('SELECT * FROM evento ORDER BY data_evento ASC')
+    eventos_db = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return render_template('index.html', eventos=eventos_db, user=session['username'])
+
+@app.route('/cadastrar', methods=['POST'])
+def cadastrar():
+    if not session.get('logado'):
+        return redirect(url_for('login'))
+    titulo = request.form['titulo']
+    data = request.form['data']
+    local = request.form['local']
+    desc = request.form['descricao']
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("INSERT INTO eventos (titulo, data_evento, local_evento, descricao), VALUES (%s, %s, %s, %s)" (titulo,data, local, desc))
+    conn.commit()
+    cursor.close()
+    conn.close()
+    return redirect(url_for('index'))
+
+if __name__=='__main__':
+    app.run(debug=True)
