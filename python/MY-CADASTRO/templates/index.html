@@ -1,20 +1,26 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Alunos</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <title>Lista de Alunos</title>
 </head>
 <body>
-    <h1>Lista de Alunos</h1>
-    <a href="{{ url_for('add') }}">Adicionar Novo Aluno</a>
+
+<div class="container">
+    <h1>📚 Sistema de Cadastro de Alunos</h1>
+
+    <a href="{{ url_for('add') }}" class="btn btn-add">
+        + Adicionar Novo Aluno
+    </a>
+
     <table>
         <thead>
             <tr>
                 <th>ID</th>
                 <th>Nome</th>
-                <th>Data de Nascimento</th>
+                <th>Nascimento</th>
                 <th>Endereço</th>
                 <th>Turma</th>
                 <th>Ações</th>
@@ -29,14 +35,23 @@
                 <td>{{ student.address }}</td>
                 <td>{{ student.class }}</td>
                 <td>
-                    <a href="{{ url_for('edit', id=student.id) }}">Editar</a>
-                    <form action="{{ url_for('delete', id=student.id) }}" method="post" style="display:inline;">
-                        <button type="submit">Deletar</button>
-                    </form>
+                    <div class="actions">
+                        <a href="{{ url_for('edit', id=student.id) }}" class="btn btn-edit">
+                            Editar
+                        </a>
+
+                        <form action="{{ url_for('delete', id=student.id) }}" method="post">
+                            <button type="submit" class="btn btn-delete">
+                                Deletar
+                            </button>
+                        </form>
+                    </div>
                 </td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
+</div>
+
 </body>
 </html>
