@@ -2,16 +2,140 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Gestão de Eventos</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | Gestão de Eventos</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: Segoe UI, sans-serif; background: #f4f4f4; padding: 30px; }
-        .container { max-width: 800px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #eee; padding-bottom: 10px; }
-        .form-add { background: #f9f9f9; padding: 20px; border-radius: 5px; margin: 20px 0; }
-        input, textarea { width: 100%; padding: 8px; margin: 5px 0 15px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
-        .btn { background: #3498db; color: white; border: none; padding: 10px 20px; cursor: pointer; border-radius: 4px; }
-        .event-card { border-left: 5px solid #3498db; background: #fff; padding: 15px; margin-bottom: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-        .logout { color: #e74c3c; text-decoration: none; font-weight: bold; }
+        :root {
+            --primary: #6366f1;
+            --primary-hover: #4f46e5;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: var(--bg); 
+            color: var(--text-main);
+            line-height: 1.5;
+            padding: 40px 20px;
+        }
+
+        .container { 
+            max-width: 900px; 
+            margin: auto; 
+        }
+
+        /* Header Estilo SaaS */
+        .header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 40px;
+        }
+
+        .header h1 { font-size: 1.5rem; font-weight: 700; color: var(--text-main); }
+        
+        .user-info { font-size: 0.9rem; color: var(--text-muted); }
+        .user-info strong { color: var(--text-main); }
+        
+        .logout { 
+            margin-left: 15px;
+            color: #ef4444; 
+            text-decoration: none; 
+            font-weight: 600;
+            padding: 6px 12px;
+            border-radius: 6px;
+            transition: background 0.2s;
+        }
+        .logout:hover { background: #fee2e2; }
+
+        /* Card de Cadastro */
+        .form-add { 
+            background: var(--card-bg); 
+            padding: 30px; 
+            border-radius: 12px; 
+            border: 1px solid var(--border);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            margin-bottom: 40px; 
+        }
+
+        .form-add h3 { margin-bottom: 20px; font-size: 1.1rem; font-weight: 600; }
+
+        .grid-inputs {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 15px;
+        }
+
+        input, textarea { 
+            width: 100%; 
+            padding: 12px 16px; 
+            margin-bottom: 15px; 
+            border: 1px solid var(--border); 
+            border-radius: 8px; 
+            font-family: inherit;
+            font-size: 0.95rem;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .btn-submit { 
+            background: var(--primary); 
+            color: white; 
+            border: none; 
+            padding: 12px 24px; 
+            cursor: pointer; 
+            border-radius: 8px; 
+            font-weight: 600;
+            width: 100%;
+            transition: background 0.2s;
+        }
+        .btn-submit:hover { background: var(--primary-hover); }
+
+        /* Lista de Eventos */
+        h2 { font-size: 1.25rem; margin-bottom: 20px; color: var(--text-main); }
+
+        .event-card { 
+            background: var(--card-bg); 
+            padding: 20px; 
+            margin-bottom: 16px; 
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .event-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        .event-card strong { font-size: 1.1rem; color: var(--text-main); display: block; margin-bottom: 4px; }
+        
+        .event-meta { 
+            font-size: 0.85rem; 
+            color: var(--primary); 
+            font-weight: 500;
+            margin-bottom: 12px;
+            display: flex;
+            gap: 15px;
+        }
+
+        .event-card p { color: var(--text-muted); font-size: 0.95rem; }
+
+        .empty-state { text-align: center; color: var(--text-muted); padding: 40px; }
     </style>
 </head>
 <body>
@@ -19,30 +143,42 @@
 <div class="container">
     <div class="header">
         <h1>Meus Eventos</h1>
-        <div>Olá, <strong>{{ user }}</strong>! <a href="/logout" class="logout">Sair</a></div>
+        <div class="user-info">
+            Olá, <strong>{{ user }}</strong>! 
+            <a href="/logout" class="logout">Sair</a>
+        </div>
     </div>
 
     <div class="form-add">
-        <h3>Novo Evento</h3>
+        <h3>Criar novo evento</h3>
         <form action="/cadastrar" method="POST">
-            <input type="text" name="titulo" placeholder="Título do Evento" required>
-            <input type="date" name="data" required>
-            <input type="text" name="local" placeholder="Local">
-            <textarea name="descricao" placeholder="Descrição"></textarea>
-            <button type="submit" class="btn" style="background:#2ecc71;">Cadastrar Evento</button>
+            <div class="grid-inputs">
+                <input type="text" name="titulo" placeholder="Título do Evento" required>
+                <input type="date" name="data" required>
+            </div>
+            <input type="text" name="local" placeholder="Local ou Link da Reunião">
+            <textarea name="descricao" rows="3" placeholder="Breve descrição do evento..."></textarea>
+            <button type="submit" class="btn-submit">Agendar Evento</button>
         </form>
     </div>
 
-    <h2>Agenda</h2>
+    <h2>Próximos Eventos</h2>
+    
     {% for ev in eventos %}
     <div class="event-card">
-        <strong>{{ ev.titulo }}</strong> <br>
-        <small>📅 {{ ev.data_evento }} | 📍 {{ ev.local_evento or 'Remoto' }}</small>
-        <p style="margin-bottom: 0;">{{ ev.descricao }}</p>
+        <strong>{{ ev.titulo }}</strong>
+        <div class="event-meta">
+            <span>📅 {{ ev.data_evento }}</span>
+            <span>📍 {{ ev.local_evento or 'Remoto' }}</span>
+        </div>
+        <p>{{ ev.descricao }}</p>
     </div>
     {% else %}
-    <p>Nenhum evento encontrado.</p>
+    <div class="empty-state">
+        <p>Você ainda não tem eventos agendados.</p>
+    </div>
     {% endfor %}
 </div>
 
 </body>
+</html>

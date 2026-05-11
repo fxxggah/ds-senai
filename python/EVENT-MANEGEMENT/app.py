@@ -2,6 +2,8 @@ from flask import Flask, render_template, request, redirect, url_for, session
 import mysql.connector
 
 app = Flask(__name__)
+# 1. DEFINA A SECRET KEY AQUI
+app.secret_key = 'dev_key_123'
 
 def get_db_connection():
     return mysql.connector.connect(
@@ -26,10 +28,10 @@ def login():
 
         if user:
             session['logado'] = True
-            session['username'] = user ['username']
+            session['username'] = user['username']
             return redirect(url_for('index')) 
         else:
-            return "Erro : usuario ou senha incorretas <a href='login'>Tentar Novamente</a>"
+            return "Erro: usuário ou senha incorretos <a href='/login'>Tentar Novamente</a>"
     return render_template('login.html')
 
 @app.route('/logout')
@@ -44,7 +46,8 @@ def index():
     
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
-    cursor.execute('SELECT * FROM evento ORDER BY data_evento ASC')
+    # Verifique se o nome da tabela é 'evento' ou 'eventos' no seu banco
+    cursor.execute('SELECT * FROM eventos ORDER BY data_evento ASC')
     eventos_db = cursor.fetchall()
     cursor.close()
     conn.close()
@@ -54,6 +57,7 @@ def index():
 def cadastrar():
     if not session.get('logado'):
         return redirect(url_for('login'))
+    
     titulo = request.form['titulo']
     data = request.form['data']
     local = request.form['local']
@@ -61,7 +65,11 @@ def cadastrar():
 
     conn = get_db_connection()
     cursor = conn.cursor()
-    cursor.execute("INSERT INTO eventos (titulo, data_evento, local_evento, descricao), VALUES (%s, %s, %s, %s)" (titulo,data, local, desc))
+    # 2. CORREÇÃO DA QUERY E DA VÍRGULA NOS PARÂMETROS
+    sql = "INSERT INTO eventos (titulo, data_evento, local_evento, descricao) VALUES (%s, %s, %s, %s)"
+    valores = (titulo, data, local, desc)
+    
+    cursor.execute(sql, valores)
     conn.commit()
     cursor.close()
     conn.close()
