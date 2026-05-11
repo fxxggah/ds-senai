@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <title>Adicionar Aluno</title>
+</head>
+<body>
+    <h1>Adicionar Novo Aluno</h1>
+    <form action="{{ url_for('add') }}" method="post">
+        <label for="name">Nome:</label>
+        <input type="text" name="name" id="name" required><br>
+        <label for="dob">Data de Nascimento:</label>
+        <input type="date" name="dob" id="dob" required><br>
+        <label for="address">Endereço:</label>
+        <input type="text" name="address" id="address" required><br>
+        <label for="class">Turma:</label>
+        <input type="text" name="class" id="class" required><br>
+        <button type="submit">Adicionar</button>

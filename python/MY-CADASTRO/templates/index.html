@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <title>Lista de Alunos</title>
+</head>
+<body>
+    <h1>Lista de Alunos</h1>
+    <a href="{{ url_for('add') }}">Adicionar Novo Aluno</a>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nome</th>
+                <th>Data de Nascimento</th>
+                <th>Endereço</th>
+                <th>Turma</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for student in students %}
+            <tr>
+                <td>{{ student.id }}</td>
+                <td>{{ student.name }}</td>
+                <td>{{ student.dob }}</td>
+                <td>{{ student.address }}</td>
+                <td>{{ student.class }}</td>
+                <td>
+                    <a href="{{ url_for('edit', id=student.id) }}">Editar</a>
+                    <form action="{{ url_for('delete', id=student.id) }}" method="post" style="display:inline;">
+                        <button type="submit">Deletar</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>
