@@ -1,0 +1,10 @@
+- Tela de cadastro
+  L 7 Dados do usuario
+
+- Tela de dashboard
+  L Listagem
+
+- Banco de Dados
+  L 1 Tabela
+    L Id - 7 Dados do Usuario - Ativo
+
