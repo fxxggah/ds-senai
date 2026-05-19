@@ -1,0 +1,13 @@
+@import "scss/functions";
+
+$primary: orange;
+
+@import "scss/variables";
+
+$custom-colors: (
+    "purple-rain": purple
+);
+$theme-colors: map-merge($theme-colors,
+        $custom-colors );
+
+@import "scss/bootstrap.scss";
