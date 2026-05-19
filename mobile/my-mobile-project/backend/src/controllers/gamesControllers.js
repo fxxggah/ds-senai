@@ -1,6 +1,6 @@
 const db = require('../config/db');
 
-const validStatus = ['Wishlist', 'Playing', 'Completed', 'Dropped'];
+const validStatus = ['Quero jogar', 'Jogando', 'Completado', 'Dropado'];
 const validClassification = ['Livre', '10', '12', '14', '16', '18'];
 
 const getGames = (req, res) => {

@@ -5,7 +5,9 @@ import {
   TextInput,
   TouchableOpacity,
   Alert,
+  Platform,
 } from 'react-native';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { Picker } from '@react-native-picker/picker';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import api from '../services/api';
@@ -13,6 +15,8 @@ import api from '../services/api';
 export default function GameForm({ mode }) {
   const { id } = useLocalSearchParams();
   const router = useRouter();
+
+  const [showDatePicker, setShowDatePicker] = useState(false);
 
   const [form, setForm] = useState({
     title: '',
@@ -27,19 +31,23 @@ export default function GameForm({ mode }) {
   async function loadGame() {
     if (mode !== 'edit') return;
 
-    const response = await api.get('/games');
-    const selected = response.data.find((item) => item.id == id);
+    try {
+      const response = await api.get('/games');
+      const selected = response.data.find((item) => item.id == id);
 
-    if (selected) {
-      setForm({
-        title: selected.title,
-        genre: selected.genre,
-        classification: selected.classification,
-        platform: selected.platform,
-        game_status: selected.game_status,
-        release_date: selected.release_date.split('T')[0],
-        developer: selected.developer,
-      });
+      if (selected) {
+        setForm({
+          title: selected.title,
+          genre: selected.genre,
+          classification: selected.classification,
+          platform: selected.platform,
+          game_status: selected.game_status,
+          release_date: selected.release_date.split('T')[0],
+          developer: selected.developer,
+        });
+      }
+    } catch (error) {
+      console.log(error.response?.data || error.message);
     }
   }
 
@@ -51,11 +59,16 @@ export default function GameForm({ mode }) {
     try {
       if (mode === 'create') {
         await api.post('/games', form);
+
         Alert.alert('Success', 'Game created successfully');
+
+        router.replace('/games');
       } else {
         await api.put(`/games/${id}`, form);
+
         Alert.alert('Success', 'Game updated successfully');
-        router.back();
+
+        router.replace('/games');
       }
     } catch (error) {
       console.log(error.response?.data || error.message);
@@ -64,7 +77,13 @@ export default function GameForm({ mode }) {
   }
 
   return (
-    <ScrollView style={{ flex: 1, backgroundColor: '#121212', padding: 20 }}>
+    <ScrollView
+      style={{
+        flex: 1,
+        backgroundColor: '#121212',
+        padding: 20,
+      }}
+    >
       <Text style={{ color: '#fff' }}>Título</Text>
       <TextInput
         value={form.title}
@@ -94,20 +113,70 @@ export default function GameForm({ mode }) {
       />
 
       <Text style={{ color: '#fff' }}>Data lançamento</Text>
-      <TextInput
-        placeholder="2022-02-25"
-        placeholderTextColor="#666"
-        value={form.release_date}
-        onChangeText={(text) => setForm({ ...form, release_date: text })}
-        style={input}
-      />
 
+      {Platform.OS === 'web' ? (
+        <TextInput
+          placeholder="YYYY-MM-DD"
+          placeholderTextColor="#666"
+          value={form.release_date}
+          onChangeText={(text) =>
+            setForm({ ...form, release_date: text })
+          }
+          style={input}
+        />
+      ) : (
+        <>
+          <TouchableOpacity onPress={() => setShowDatePicker(true)}>
+            <TextInput
+              placeholder="Selecione uma data"
+              placeholderTextColor="#666"
+              value={form.release_date}
+              editable={false}
+              style={input}
+            />
+          </TouchableOpacity>
+
+          {showDatePicker && (
+            <DateTimePicker
+              value={
+                form.release_date
+                  ? new Date(form.release_date)
+                  : new Date()
+              }
+              mode="date"
+              display="default"
+              onChange={(event, selectedDate) => {
+                setShowDatePicker(false);
+
+                if (selectedDate) {
+                  const formattedDate = selectedDate
+                    .toISOString()
+                    .split('T')[0];
+
+                  setForm({
+                    ...form,
+                    release_date: formattedDate,
+                  });
+                }
+              }}
+            />
+          )}
+        </>
+      )}
+
+      <Text style={{ color: '#fff', marginTop: 10 }}>
+        Classificação
+      </Text>
       <Picker
         selectedValue={form.classification}
         onValueChange={(value) =>
           setForm({ ...form, classification: value })
         }
-        style={{ color: '#fff', backgroundColor: '#1E1E1E' }}
+        style={{
+          color: '#fff',
+          backgroundColor: '#1E1E1E',
+          marginBottom: 16,
+        }}
       >
         <Picker.Item label="Livre" value="Livre" />
         <Picker.Item label="10" value="10" />
@@ -117,17 +186,21 @@ export default function GameForm({ mode }) {
         <Picker.Item label="18" value="18" />
       </Picker>
 
+      <Text style={{ color: '#fff' }}>Status</Text>
       <Picker
         selectedValue={form.game_status}
         onValueChange={(value) =>
           setForm({ ...form, game_status: value })
         }
-        style={{ color: '#fff', backgroundColor: '#1E1E1E' }}
+        style={{
+          color: '#fff',
+          backgroundColor: '#1E1E1E',
+        }}
       >
-        <Picker.Item label="Wishlist" value="Wishlist" />
-        <Picker.Item label="Playing" value="Playing" />
-        <Picker.Item label="Completed" value="Completed" />
-        <Picker.Item label="Dropped" value="Dropped" />
+        <Picker.Item label="Quero jogar" value="Quero jogar" />
+        <Picker.Item label="Jogando" value="Jogando" />
+        <Picker.Item label="Completado" value="Completado" />
+        <Picker.Item label="Dropado" value="Dropado" />
       </Picker>
 
       <TouchableOpacity
@@ -140,8 +213,16 @@ export default function GameForm({ mode }) {
           marginBottom: 40,
         }}
       >
-        <Text style={{ color: '#fff', textAlign: 'center' }}>
-          {mode === 'create' ? 'Criar Game' : 'Salvar Alterações'}
+        <Text
+          style={{
+            color: '#fff',
+            textAlign: 'center',
+            fontWeight: 'bold',
+          }}
+        >
+          {mode === 'create'
+            ? 'Criar Game'
+            : 'Salvar Alterações'}
         </Text>
       </TouchableOpacity>
     </ScrollView>
