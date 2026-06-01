@@ -1,0 +1,169 @@
+/* Importação da fonte moderna Inter (padrão em sistemas SaaS) */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+:root {
+    --bg-primary: #f8fafc;
+    --bg-card: #ffffff;
+    --text-main: #0f172a;
+    --text-muted: #64748b;
+    --brand-color: #4f46e5; /* Roxo/Azul moderno SaaS */
+    --brand-hover: #4338ca;
+    --border-color: #e2e8f0;
+    --radius: 12px;
+}
+
+body {
+    background-color: var(--bg-primary);
+    font-family: 'Inter', sans-serif;
+    color: var(--text-main);
+    font-size: 15px;
+    letter-spacing: -0.01em;
+}
+
+/* Estrutura de Layout Estilo Dashboard */
+.saas-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem;
+}
+
+.saas-header {
+    margin-bottom: 2.5rem;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.saas-title {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--text-main);
+    margin: 0;
+}
+
+.saas-subtitle {
+    font-size: 14px;
+    color: var(--text-muted);
+    margin-top: 0.25rem;
+}
+
+/* Cards Estilizados */
+.saas-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius);
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.05);
+    padding: 1.75rem;
+    margin-bottom: 2rem;
+}
+
+.card-title-saas {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 1.25rem;
+    color: var(--text-main);
+}
+
+/* Formulários SaaS */
+.form-label-saas {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-muted);
+    margin-bottom: 0.5rem;
+}
+
+.form-control-saas {
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 0.625rem 0.875rem;
+    font-size: 14px;
+    transition: all 0.2s ease-in-out;
+    background-color: #fff;
+    color: var(--text-main);
+}
+
+.form-control-saas:focus {
+    border-color: var(--brand-color);
+    box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+    outline: 0;
+}
+
+/* Botões do Sistema */
+.btn-saas-primary {
+    background-color: var(--brand-color);
+    border: 1px solid var(--brand-color);
+    color: white;
+    font-weight: 500;
+    font-size: 14px;
+    padding: 0.625rem 1.25rem;
+    border-radius: 8px;
+    transition: all 0.2s;
+    width: 100%;
+}
+
+.btn-saas-primary:hover {
+    background-color: var(--brand-hover);
+    border-color: var(--brand-hover);
+    color: white;
+}
+
+/* Tabelas Estilo SaaS Data-Grid */
+.table-responsive-saas {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+}
+
+.table-saas {
+    margin-bottom: 0;
+    width: 100%;
+    vertical-align: middle;
+}
+
+.table-saas thead th {
+    background-color: #f8fafc;
+    color: var(--text-muted);
+    font-weight: 600;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.table-saas tbody td {
+    padding: 1rem 1.5rem;
+    font-size: 14px;
+    color: var(--text-main);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.table-saas tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.table-saas tbody tr:hover {
+    background-color: #f8fafc;
+}
+
+/* Badge de ID */
+.badge-id {
+    background-color: #f1f5f9;
+    color: #475569;
+    padding: 0.25rem 0.5rem;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 12px;
+}
+
+/* Alertas/Mensagens */
+.alert {
+    border-radius: 8px;
+    font-size: 14px;
+    padding: 0.75rem 1rem;
+    border: 1px solid transparent;
+}
