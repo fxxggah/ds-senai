@@ -1,0 +1,279 @@
+========================================================================
+CÓDIGOS DO PROJETO - CURRÍCULO INTERATIVO (REACT + VITE + BOOTSTRAP)
+Aluno: Gabriel Oliveira da Silva
+========================================================================
+
+------------------------------------------------------------------------
+1. ARQUIVO: src/App.jsx
+------------------------------------------------------------------------
+
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+
+// Importando os componentes isolados da pasta src/pages/
+import Inicio from './pages/Inicio';
+import Sobre from './pages/Sobre';
+import Experiencia from './pages/Experiencia';
+import Projetos from './pages/Projetos';
+import Contato from './pages/Contato';
+
+function App() {
+  return (
+    <Router>
+      <div>
+        {/* Navbar Bootstrap com os novos botões adicionados */}
+        <nav className="navbar navbar-expand navbar-dark bg-dark">
+          <div className="container">
+            <span className="navbar-brand">Meu Currículo</span>
+            <div className="navbar-nav flex-row gap-3">
+              <Link className="nav-link" to="/">Início</Link>
+              <Link className="nav-link" to="/sobre">Sobre</Link>
+              <Link className="nav-link" to="/experiencia">Experiência</Link>
+              <Link className="nav-link" to="/projetos">Projetos</Link>
+              <Link className="nav-link" to="/contato">Contato</Link>
+            </div>
+          </div>
+        </nav>
+
+        {/* Áreas das Rotas (agora contendo as 5 páginas) */}
+        <div className="container mt-3">
+          <Routes>
+            <Route path="/" element={<Inicio />} />
+            <Route path="/sobre" element={<Sobre />} />
+            <Route path="/experiencia" element={<Experiencia />} />
+            <Route path="/projetos" element={<Projetos />} />
+            <Route path="/contato" element={<Contato />} />
+          </Routes>
+        </div>
+      </div>
+    </Router>
+  );
+}
+
+export default App;
+
+------------------------------------------------------------------------
+2. ARQUIVO: src/pages/Inicio.jsx
+------------------------------------------------------------------------
+import React from 'react';
+import { Link } from 'react-router-dom';
+
+const Inicio = () => (
+  <div className="container mt-5">
+    <div className="p-5 text-center bg-light rounded-3 shadow-sm border">
+      <h1 className="display-4 fw-bold text-primary mb-3">Olá, eu sou o Gabriel Silva!</h1>
+      <h2 className="fs-4 text-muted mb-4">
+        Estudante de Engenharia de Software | Desenvolvedor Backend Java
+      </h2>
+      <hr className="my-4 w-75 mx-auto" />
+      <p className="lead mb-5">
+        Sou apaixonado por tecnologia e focado em criar soluções escaláveis. Busco minha primeira oportunidade como desenvolvedor para aprender continuamente e gerar impacto real através de código limpo e arquitetura robusta.
+      </p>
+      <div className="d-flex justify-content-center gap-3 flex-wrap">
+        <Link to="/projetos" className="btn btn-primary btn-lg px-4 shadow-sm">Ver Meus Projetos</Link>
+        <Link to="/contato" className="btn btn-outline-dark btn-lg px-4 shadow-sm">Entrar em Contato</Link>
+      </div>
+    </div>
+  </div>
+);
+
+export default Inicio;
+
+
+------------------------------------------------------------------------
+3. ARQUIVO: src/pages/Sobre.jsx
+------------------------------------------------------------------------
+import React from 'react';
+
+const Sobre = () => (
+  <div className="container mt-4 mb-5">
+    <div className="card shadow-sm border-0">
+      <div className="card-body p-4 p-md-5">
+        <h2 className="card-title text-success mb-4 fw-bold border-bottom pb-2">Sobre Mim</h2>
+        <p className="card-text text-secondary mb-5 lh-lg">
+          Sou estudante de Engenharia de Software (UniFatecie) e Técnico em Desenvolvimento de Sistemas (SENAI). Meu foco é o desenvolvimento backend com <strong>Java e Spring Boot</strong>. Possuo facilidade de aprendizado rápido, pensamento analítico e foco em resultados, habilidades que desenvolvi em minhas experiências de trabalho.
+        </p>
+
+        <div className="row mt-4">
+          <div className="col-lg-6 mb-4">
+            <h4 className="text-dark mb-3">🎓 Formação & Certificações</h4>
+            <ul className="list-group list-group-flush">
+              <li className="list-group-item bg-transparent">
+                <strong>Engenharia de Software</strong> - UniFatecie (2026 - 2029)
+              </li>
+              <li className="list-group-item bg-transparent">
+                <strong>Técnico em Desenvolvimento de Sistemas</strong> - SENAI (2026 - 2027)
+              </li>
+              <li className="list-group-item bg-transparent">
+                <strong>Formação Java Developer</strong> - DIO (Em andamento)
+              </li>
+              <li className="list-group-item bg-transparent">
+                <strong>IA Generativa & Google Cloud</strong> - SENAI
+              </li>
+            </ul>
+          </div>
+          
+          <div className="col-lg-6 mb-4">
+            <h4 className="text-dark mb-3">💻 Hard Skills</h4>
+            <div className="d-flex flex-wrap gap-2 mt-3">
+              {['Java', 'Spring Boot', 'MySQL', 'Docker', 'APIs REST', 'JWT', 'Git & GitHub', 'Next.js', 'React', 'AWS'].map(skill => (
+                <span key={skill} className="badge bg-dark fs-6 px-3 py-2 fw-normal">{skill}</span>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+);
+
+export default Sobre;
+
+
+------------------------------------------------------------------------
+4. ARQUIVO: src/pages/Experiencia.jsx
+------------------------------------------------------------------------
+import React from 'react';
+
+const Experiencia = () => (
+  <div className="container mt-4 mb-5">
+    <h2 className="text-warning text-center mb-5 fw-bold">Trajetória Profissional</h2>
+    
+    <div className="row justify-content-center">
+      <div className="col-lg-8">
+        
+        {/* Card 1 */}
+        <div className="card shadow-sm border-0 border-start border-warning border-4 mb-4">
+          <div className="card-body p-4">
+            <h4 className="card-title text-dark mb-1">Prestador de Serviços de Informática</h4>
+            <h6 className="card-subtitle text-muted mb-3">Comércio Local | 2026 – Atual</h6>
+            <p className="card-text">Realização de serviços de informática em geral, conciliando o trabalho com os estudos e o desenvolvimento de projetos pessoais.</p>
+          </div>
+        </div>
+
+        {/* Card 2 */}
+        <div className="card shadow-sm border-0 border-start border-warning border-4 mb-4">
+          <div className="card-body p-4">
+            <h4 className="card-title text-dark mb-1">Vendedor Autônomo</h4>
+            <h6 className="card-subtitle text-muted mb-3">Marketplace / Facebook | 2025 – Atual</h6>
+            <p className="card-text">Compra e venda de eletrônicos. Atuação direta com negociação, atendimento ao cliente, precificação, controle de estoque e gestão financeira.</p>
+          </div>
+        </div>
+
+        {/* Card 3 */}
+        <div className="card shadow-sm border-0 border-start border-warning border-4 mb-4">
+          <div className="card-body p-4">
+            <h4 className="card-title text-dark mb-1">Jovem Aprendiz – PPCP</h4>
+            <h6 className="card-subtitle text-muted mb-3">Caio Induscar | 2024 – 2025</h6>
+            <p className="card-text">Atuei no setor de Planejamento e Controle da Produção em uma das maiores fabricantes de ônibus do país, desenvolvendo responsabilidade, análise de processos e trabalho em equipe.</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+);
+
+export default Experiencia;
+
+
+------------------------------------------------------------------------
+5. ARQUIVO: src/pages/Projetos.jsx
+------------------------------------------------------------------------
+import React from 'react';
+
+const Projetos = () => (
+  <div className="container mt-4 mb-5">
+    <h2 className="text-danger text-center mb-4 fw-bold">Meus Projetos</h2>
+    <p className="text-center text-secondary mb-5">Conheça algumas soluções que desenvolvi aplicando arquitetura e boas práticas em backend.</p>
+    
+    <div className="row g-4">
+      {/* Projeto 1 */}
+      <div className="col-md-6 col-lg-4">
+        <div className="card h-100 shadow-sm border-0">
+          <div className="card-body d-flex flex-column">
+            <h5 className="card-title text-danger fw-bold">Catálogos Personalizados</h5>
+            <p className="card-text flex-grow-1 mt-2">Sistema completo para conectar catálogos a uma dashboard administrativa, contendo autenticação JWT e gerenciamento de usuários.</p>
+            <div className="mb-4">
+              <span className="badge bg-secondary me-1">Java</span>
+              <span className="badge bg-secondary me-1">Spring Boot</span>
+              <span className="badge bg-secondary me-1">Next.js</span>
+            </div>
+            <a href="https://github.com/fxxggah" target="_blank" rel="noopener noreferrer" className="btn btn-outline-danger w-100 mt-auto">Ver Repositório</a>
+          </div>
+        </div>
+      </div>
+
+      {/* Projeto 2 */}
+      <div className="col-md-6 col-lg-4">
+        <div className="card h-100 shadow-sm border-0">
+          <div className="card-body d-flex flex-column">
+            <h5 className="card-title text-danger fw-bold">API Controle de Estoque</h5>
+            <p className="card-text flex-grow-1 mt-2">API RESTful para gerenciamento de produtos e estoque. Implementa operações CRUD, persistência de dados e arquitetura em camadas.</p>
+            <div className="mb-4">
+              <span className="badge bg-secondary me-1">Java</span>
+              <span className="badge bg-secondary me-1">MySQL</span>
+              <span className="badge bg-secondary me-1">Docker</span>
+            </div>
+            <a href="https://github.com/fxxggah" target="_blank" rel="noopener noreferrer" className="btn btn-outline-danger w-100 mt-auto">Ver Repositório</a>
+          </div>
+        </div>
+      </div>
+
+      {/* Projeto 3 */}
+      <div className="col-md-6 col-lg-4">
+        <div className="card h-100 shadow-sm border-0">
+          <div className="card-body d-flex flex-column">
+            <h5 className="card-title text-danger fw-bold">Bot para Afiliados</h5>
+            <p className="card-text flex-grow-1 mt-2">Aplicação desenvolvida para automatizar a coleta e a organização de ofertas de marketplaces, auxiliando na divulgação de produtos.</p>
+            <div className="mb-4">
+              <span className="badge bg-secondary me-1">Python</span>
+              <span className="badge bg-secondary me-1">Automação</span>
+            </div>
+            <a href="https://github.com/fxxggah" target="_blank" rel="noopener noreferrer" className="btn btn-outline-danger w-100 mt-auto">Ver Repositório</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+);
+
+export default Projetos;
+
+
+------------------------------------------------------------------------
+6. ARQUIVO: src/pages/Contato.jsx
+------------------------------------------------------------------------
+import React from 'react';
+
+const Contato = () => (
+  <div className="container mt-5 text-center">
+    <h2 className="text-info fw-bold mb-3">Vamos Conversar?</h2>
+    <p className="lead text-secondary mb-5">Estou sempre aberto a novas conexões, aprendizados e oportunidades na área de desenvolvimento.</p>
+    
+    <div className="row justify-content-center">
+      <div className="col-md-8 col-lg-6">
+        <div className="card shadow-sm border-0 p-3">
+          <div className="card-body">
+            <ul className="list-group list-group-flush fs-5">
+              <li className="list-group-item bg-transparent py-4">
+                <strong>📧 E-mail: </strong> 
+                <a href="mailto:gabrielsilvaoli07@gmail.com" className="text-decoration-none text-info">gabrielsilvaoli07@gmail.com</a>
+              </li>
+              <li className="list-group-item bg-transparent py-4">
+                <strong>🐙 GitHub: </strong> 
+                <a href="https://github.com/fxxggah" target="_blank" rel="noopener noreferrer" className="text-decoration-none text-dark">github.com/fxxggah</a>
+              </li>
+              <li className="list-group-item bg-transparent py-4">
+                <strong>💼 LinkedIn: </strong> 
+                <a href="https://linkedin.com/" target="_blank" rel="noopener noreferrer" className="text-decoration-none text-primary">Acessar meu Perfil</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+);
+
+export default Contato;
