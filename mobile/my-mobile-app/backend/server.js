@@ -161,6 +161,26 @@ app.post('/suporte', async (req, res) => {
   }
 });
 
+// Rota GET: Buscar perfil do usuário por ID
+app.get('/usuarios/:id', async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const query = 'SELECT id, nome, email, setor FROM usuarios WHERE id = ?';
+    const [linhas] = await db.query(query, [id]);
+
+    if (linhas.length === 0) {
+      return res.status(404).json({ error: "Usuário não encontrado." });
+    }
+
+    // Retorna os dados do usuário encontrado
+    res.status(200).json(linhas[0]);
+  } catch (erro) {
+    console.error(erro);
+    res.status(500).json({ error: "Erro ao buscar dados do perfil." });
+  }
+});
+
 // Iniciando o servidor na porta 3003
 const PORT = process.env.PORT || 3003;
 app.listen(PORT, () => {

@@ -1,10 +1,42 @@
-import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
+import { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, Image, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage'; // 💾 1. Importação do AsyncStorage
+import api from '../../services/api'; 
 
 export default function TelaStatus() {
+  const [usuario, setUsuario] = useState(null);
+  const [carregando, setCarregando] = useState(true);
+
+  useEffect(() => {
+    carregarPerfil();
+  }, []);
+
+  const carregarPerfil = async () => {
+    try {
+      // 💾 2. Recupera o ID salvo no momento do login
+      const idSalvo = await AsyncStorage.getItem('usuarioId');
+
+      if (!idSalvo) {
+        Alert.alert('Erro', 'Nenhum usuário autenticado encontrado.');
+        return;
+      }
+
+      // 🚀 3. Faz a requisição usando o ID dinâmico do usuário
+      const resposta = await api.get(`/usuarios/${idSalvo}`);
+      setUsuario(resposta.data);
+
+    } catch (erro) {
+      console.error('Erro ao buscar perfil:', erro);
+      Alert.alert('Erro', 'Não foi possível carregar os dados do perfil.');
+    } finally {
+      setCarregando(false);
+    }
+  };
+
   return (
     <View style={styles.container}>
       
-      {/* Espaço reservado para a Foto do Crachá (BLOB) */}
+      {/* Foto do Crachá */}
       <View style={styles.fotoContainer}>
         <Image 
           source={{ uri: 'https://cdn-icons-png.flaticon.com/512/149/149071.png' }} 
@@ -15,16 +47,24 @@ export default function TelaStatus() {
         </TouchableOpacity>
       </View>
 
-      <View style={styles.dadosContainer}>
-        <Text style={styles.label}>Nome do Operador:</Text>
-        <Text style={styles.valor}>Carregando...</Text>
+      {/* Exibe o indicador de carregando ou os dados vindos do banco */}
+      {carregando ? (
+        <ActivityIndicator size="large" color="#003366" style={{ marginTop: 20 }} />
+      ) : (
+        <View style={styles.dadosContainer}>
+          <Text style={styles.label}>Nome do Operador:</Text>
+          <Text style={styles.valor}>{usuario?.nome || 'Não informado'}</Text>
 
-        <Text style={styles.label}>Setor / Área:</Text>
-        <Text style={styles.valor}>Carregando...</Text>
+          <Text style={styles.label}>E-mail:</Text>
+          <Text style={styles.valor}>{usuario?.email || 'Não informado'}</Text>
 
-        <Text style={styles.label}>Status atual:</Text>
-        <Text style={[styles.valor, { color: 'green', fontWeight: 'bold' }]}>Ativo na Planta</Text>
-      </View>
+          <Text style={styles.label}>Setor / Área:</Text>
+          <Text style={styles.valor}>{usuario?.setor || 'Geral'}</Text>
+
+          <Text style={styles.label}>Status atual:</Text>
+          <Text style={[styles.valor, { color: 'green', fontWeight: 'bold' }]}>Ativo na Planta</Text>
+        </View>
+      )}
 
     </View>
   );

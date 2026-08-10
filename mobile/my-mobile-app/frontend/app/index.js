@@ -14,7 +14,8 @@ import {
 } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { Link, useRouter } from 'expo-router'; 
-import { useNetInfo } from '@react-native-community/netinfo'; // 🔌 1. Importando o NetInfo
+import { useNetInfo } from '@react-native-community/netinfo';
+import AsyncStorage from '@react-native-async-storage/async-storage'; // 💾 1. Importação do AsyncStorage
 import api from '../services/api'; 
 
 export default function TelaLogin() {
@@ -23,7 +24,7 @@ export default function TelaLogin() {
   const [carregando, setCarregando] = useState(false); 
   
   const router = useRouter(); 
-  const netInfo = useNetInfo(); // 🔌 2. Capturando o status da rede
+  const netInfo = useNetInfo();
 
   const fazerLogin = async () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -41,7 +42,14 @@ export default function TelaLogin() {
         senha: senha
       });
 
-      const nomeUsuario = resposta.data.usuario?.nome || email;
+      const usuario = resposta.data.usuario;
+
+      // 💾 2. Salva o ID dinâmico do usuário na memória do aparelho
+      if (usuario?.id) {
+        await AsyncStorage.setItem('usuarioId', String(usuario.id));
+      }
+
+      const nomeUsuario = usuario?.nome || email;
       Alert.alert('Acesso Permitido', `Bem-vindo(a), ${nomeUsuario}!`);
       
       router.replace('/(tabs)/home');
@@ -71,7 +79,6 @@ export default function TelaLogin() {
       >
         <StatusBar barStyle="light-content" backgroundColor="#1e1e1e" />
         
-        {/* 🔌 3. Banner vermelho que só aparece se estiver offline */}
         {netInfo.isConnected === false && (
           <View style={styles.bannerOffline}>
             <Text style={styles.textoOffline}>
@@ -100,7 +107,6 @@ export default function TelaLogin() {
           onChangeText={setSenha}
         />
         
-        {/* 🔌 4. Botão desabilita e fica cinza se estiver offline ou carregando */}
         <TouchableOpacity 
           style={[
             styles.botao, 
@@ -137,7 +143,6 @@ export const styles = StyleSheet.create({
     backgroundColor: '#F8FAFC', 
     justifyContent: 'center', 
   },
-  // 🔌 Estilos adicionados para o Banner e Botão Desabilitado
   bannerOffline: {
     backgroundColor: '#EF4444',
     padding: 12,
