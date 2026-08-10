@@ -1,64 +1,61 @@
-// Importando as ferramentas
+// A primeira linha DEVE ser a importação do dotenv
+require('dotenv').config();
+
 const express = require('express');
 const cors = require('cors');
+const db = require('./db'); // Importamos nossa conexão com o banco
 
-// Inicializando o aplicativo Express
 const app = express();
-
-// Configurações (Middlewares)
-app.use(cors()); // Permite que o frontend (celular) conecte sem bloqueios
-app.use(express.json()); // Ensina o servidor a entender dados no formato JSON
+app.use(cors());
+app.use(express.json());
 
 // --- ENDPOINTS (Rotas da API) ---
 
-// POST /cadastro (Criar novo operador)
-app.post('/cadastro', (req, res) => {
-  // req.body contém os dados que o celular enviará
+// POST /cadastro (Gravar no Banco)
+app.post('/cadastro', async (req, res) => {
   const { nome, email, senha, setor } = req.body;
-  
-  console.log(`[AUTH] Recebido pedido de cadastro para: ${nome}`);
-  
-  // Simulação de resposta de sucesso (Código 201: Created)
-  res.status(201).json({ message: "Operador cadastrado com sucesso!" });
-});
 
-// POST /login (Autenticar operador)
-app.post('/login', (req, res) => {
-  const { email, senha } = req.body;
-  
-  console.log(`[AUTH] Tentativa de login: ${email}`);
-  
-  // Na próxima aula, verificaremos isso no Banco de Dados
-  if (email && senha) {
-    // Código 200: OK
-    res.status(200).json({ message: "Login autorizado!", token: "12345" });
-  } else {
-    // Código 400: Bad Request (Erro do cliente)
-    res.status(400).json({ error: "E-mail ou senha ausentes" });
+  try {
+    // O '?' evita ataques de SQL Injection (segurança!)
+    const query = 'INSERT INTO operadores (nome, email, senha, setor) VALUES (?, ?, ?, ?)';
+    const [resultado] = await db.query(query, [nome, email, senha, setor]);
+
+    console.log(`[AUTH] Operador cadastrado com ID: ${resultado.insertId}`);
+    res.status(201).json({ message: "Operador cadastrado com sucesso!", id: resultado.insertId });
+  } catch (erro) {
+    console.error(erro);
+    // Se o erro for 1062, significa que o UNIQUE do email barrou a operação
+    if (erro.code === 'ER_DUP_ENTRY') {
+      res.status(400).json({ error: "Este e-mail corporativo já está em uso." });
+    } else {
+      res.status(500).json({ error: "Erro interno no servidor." });
+    }
   }
 });
 
-// POST /recuperar (Recuperar senha)
-app.post('/recuperar', (req, res) => {
-  const { email } = req.body;
-  console.log(`[AUTH] Pedido de recuperação para: ${email}`);
-  res.status(200).json({ message: "Instruções enviadas para o e-mail." });
+// POST /login (Ler do Banco)
+app.post('/login', async (req, res) => {
+  const { email, senha } = req.body;
+
+  try {
+    const query = 'SELECT * FROM operadores WHERE email = ? AND senha = ?';
+    const [linhas] = await db.query(query, [email, senha]);
+
+    // O 'linhas' é uma matriz. Se length > 0, achamos o usuário.
+    if (linhas.length > 0) {
+      console.log(`[AUTH] Login autorizado: ${email}`);
+      res.status(200).json({ message: "Login autorizado!", usuario: linhas[0] });
+    } else {
+      console.log(`[AUTH] Login falhou: ${email}`);
+      res.status(401).json({ error: "E-mail ou senha incorretos." });
+    }
+  } catch (erro) {
+    console.error(erro);
+    res.status(500).json({ error: "Erro interno no servidor." });
+  }
 });
 
-// POST /logout (Encerrar sessão)
-app.post('/logout', (req, res) => {
-  const { email } = req.body;
-  
-  console.log(`[AUTH] Sessão encerrada para: ${email}`);
-  
-  res.status(200).json({
-    message: "Sessão encerrada com sucesso!"
-  });
-});
-
-
-// Iniciando o servidor na Porta 3001
-const PORT = 3001;
+const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
-  console.log(`Serviço de Autenticação rodando na porta ${PORT} 🚀`);
+  console.log(`Serviço de Autenticação rodando na porta ${PORT}`);
 });
