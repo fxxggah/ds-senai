@@ -8,20 +8,49 @@ import {
   StatusBar,
   KeyboardAvoidingView,
   ScrollView,
-  Platform 
+  Platform,
+  Alert
 } from 'react-native';
-import { Link } from 'expo-router';
+import { Link, useRouter } from 'expo-router'; // Adicionado useRouter
+import api from '../services/api'; // 🔌 Importando nossa conexão com o backend
 
 export default function TelaLogin() {
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
+  const router = useRouter(); // Preparando para redirecionar o usuário no futuro
 
-  const fazerLogin = () => {
+  // 🔌 Transformando a função em assíncrona (async)
+  const fazerLogin = async () => {
+    // Trocamos o alert da web pelo Alert nativo do celular
     if (email === '' || senha === '') {
-      alert('Atenção: Preencha e-mail e senha para acessar o estoque!');
+      Alert.alert('Atenção', 'Preencha e-mail e senha para acessar o estoque!');
       return;
     }
-    alert('Acessando sistema com: ' + email);
+    
+    try {
+      // 🔌 Enviando o POST para o nosso backend real (Rota /login)
+      const resposta = await api.post('/login', {
+        email: email,
+        senha: senha
+      });
+
+      // Pega o nome retornado do banco de dados (se houver) ou mostra aviso padrão
+      const nomeUsuario = resposta.data.usuario?.nome || email;
+      Alert.alert('Acesso Permitido', `Bem-vindo(a), ${nomeUsuario}!`);
+      
+      // Aqui entrará a navegação para a próxima tela na Aula 6
+      // router.replace('/(tabs)');
+
+    } catch (erro) {
+      console.error(erro);
+      if (erro.response) {
+        // Erro 401: Senha incorreta ou email não existe
+        Alert.alert('Acesso Negado', erro.response.data.error);
+      } else {
+        // Erro de rede (IP errado ou servidor offline)
+        Alert.alert('Erro', 'Servidor offline ou IP incorreto.');
+      }
+    }
   };
 
   return (
@@ -75,51 +104,49 @@ export default function TelaLogin() {
   );
 }
 
+// Seu estilo incrível permanece 100% igual!
 export const styles = StyleSheet.create({
   scrollContainer: {
     flexGrow: 1, 
-    padding: 24, // Mais respiro nas laterais
-    backgroundColor: '#F8FAFC', // Slate 50: Um cinza quase branco e muito elegante
+    padding: 24, 
+    backgroundColor: '#F8FAFC', 
     justifyContent: 'center', 
   },
   titulo: {
-    fontSize: 34, // Um pouco maior
-    fontWeight: '800', // Fonte bem pesada (bold)
-    color: '#0F172A', // Slate 900: Um "quase preto" sofisticado
+    fontSize: 34, 
+    fontWeight: '800', 
+    color: '#0F172A', 
     textAlign: 'center',
-    letterSpacing: -0.5, // Aproxima levemente as letras (tendência moderna)
+    letterSpacing: -0.5, 
   },
   subtitulo: {
     fontSize: 16,
-    color: '#64748B', // Slate 500: Cinza médio com baixo contraste
+    color: '#64748B', 
     textAlign: 'center',
     marginTop: 8,
-    marginBottom: 40, // Afasta bem o cabeçalho do formulário
+    marginBottom: 40, 
   },
   input: {
-    backgroundColor: '#FFFFFF', // Fundo totalmente branco
+    backgroundColor: '#FFFFFF', 
     borderWidth: 1,
-    borderColor: '#E2E8F0', // Slate 200: Borda super sutil
-    borderRadius: 12, // Arredondamento moderno
-    padding: 16, // Área de clique mais confortável
+    borderColor: '#E2E8F0', 
+    borderRadius: 12, 
+    padding: 16, 
     marginBottom: 16,
     fontSize: 16,
-    color: '#334155', // Cor do texto que o usuário digita
-    // Sombra suave para destacar o input do fundo (iOS)
+    color: '#334155', 
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.05,
     shadowRadius: 2,
-    // Sombra suave (Android)
     elevation: 1, 
   },
   botao: {
-    backgroundColor: '#4F46E5', // Indigo 600: Cor tech vibrante e moderna
-    padding: 18, // Botão um pouco mais alto
+    backgroundColor: '#4F46E5', 
+    padding: 18, 
     borderRadius: 12,
     alignItems: 'center',
     marginTop: 12,
-    // Sombra colorida no botão para dar efeito de "brilho"
     shadowColor: '#4F46E5',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.25,
@@ -130,7 +157,7 @@ export const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 16,
     fontWeight: 'bold',
-    letterSpacing: 0.5, // Afasta um pouco as letras para melhor leitura em caixa alta
+    letterSpacing: 0.5, 
   },
   linksContainer: {
     flexDirection: 'row',
@@ -138,11 +165,11 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: 32,
     flexWrap: 'wrap',
-    gap: 12, // Propriedade moderna para espaçar os itens automaticamente
+    gap: 12, 
   },
   linkText: {
-    color: '#4F46E5', // Mesma cor do botão
+    color: '#4F46E5', 
     fontWeight: '600',
-    fontSize: 14, // Fonte um pouco menor para links secundários
+    fontSize: 14, 
   },
 });

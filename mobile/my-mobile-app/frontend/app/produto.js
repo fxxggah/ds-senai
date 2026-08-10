@@ -11,28 +11,51 @@ import {
   StatusBar
 } from 'react-native';
 import { styles } from './index'; 
+import api from '../services/api'; // 🔌 Importando nossa conexão com a API
 
 export default function TelaProduto() {
   const [nomeProduto, setNomeProduto] = useState('');
   const [categoria, setCategoria] = useState('');
   const [quantidade, setQuantidade] = useState('');
-  const [observacao, setObservacao] = useState('');
+  // Trocamos observacao por preco para alinhar com o Banco de Dados
+  const [preco, setPreco] = useState(''); 
 
-  const registrarEntrada = () => {
-    if (!nomeProduto || !categoria || !quantidade) {
-      Alert.alert('Erro', 'Preencha o Nome, Categoria e Quantidade do produto!');
+  const registrarEntrada = async () => {
+    // Validação básica atualizada para exigir o preço
+    if (!nomeProduto || !categoria || !quantidade || !preco) {
+      Alert.alert('Erro', 'Preencha o Nome, Categoria, Quantidade e Preço do produto!');
       return;
     }
 
-    Alert.alert(
-      'Produto Registrado!',
-      `Foram adicionadas ${quantidade} unidades de ${nomeProduto} (${categoria}) ao estoque.`
-    );
+    try {
+      // 🔌 Enviando o POST com a propriedade "preco" exata que o backend espera
+      const resposta = await api.post('/produtos', {
+        nome: nomeProduto,
+        categoria: categoria,
+        quantidade: quantidade,
+        preco: preco 
+      });
 
-    setNomeProduto('');
-    setCategoria('');
-    setQuantidade('');
-    setObservacao('');
+      // Sucesso!
+      Alert.alert(
+        'Produto Registrado!',
+        resposta.data.message || `Foram adicionadas ${quantidade} unidades de ${nomeProduto} ao estoque.`
+      );
+
+      // Limpa os campos após salvar
+      setNomeProduto('');
+      setCategoria('');
+      setQuantidade('');
+      setPreco('');
+
+    } catch (erro) {
+      console.error(erro);
+      if (erro.response) {
+        Alert.alert('Atenção', erro.response.data.error || 'Não foi possível cadastrar o produto.');
+      } else {
+        Alert.alert('Erro de Rede', 'Não foi possível conectar ao servidor de estoque.');
+      }
+    }
   };
 
   return (
@@ -72,18 +95,18 @@ export default function TelaProduto() {
         <TextInput
           style={styles.input}
           placeholder="Quantidade Recebida (ex: 10)"
-          keyboardType="numeric" // Abre o teclado numérico
+          keyboardType="numeric" 
           value={quantidade}
           onChangeText={setQuantidade}
         />
 
+        {/* Novo input de Preço no lugar da Observação */}
         <TextInput
-          style={[styles.input, { height: 100, textAlignVertical: 'top' }]}
-          placeholder="Observações (ex: Produtos de vitrine, embalagem amassada)"
-          multiline={true}
-          numberOfLines={3}
-          value={observacao}
-          onChangeText={setObservacao}
+          style={styles.input}
+          placeholder="Preço Unitário (ex: 250.00)"
+          keyboardType="numeric"
+          value={preco}
+          onChangeText={setPreco}
         />
 
         <TouchableOpacity style={styles.botao} onPress={registrarEntrada}>

@@ -11,6 +11,7 @@ import {
   StatusBar
 } from 'react-native';
 import { styles } from './index'; // Importando o visual da tela principal
+import api from '../services/api'; // 🔌 Importando nossa conexão com o backend
 
 export default function TelaCadastro() {
   const [nome, setNome] = useState('');
@@ -18,19 +19,43 @@ export default function TelaCadastro() {
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
 
-  const registrarEquipe = () => {
+  // 🔌 Transformando a função em assíncrona (async)
+  const registrarEquipe = async () => {
+    // Validação básica
     if (!nome || !cargo || !email || !senha) {
       Alert.alert('Erro', 'Por favor, preencha todos os dados do funcionário!');
       return;
     }
 
-    Alert.alert('Sucesso', `Membro da equipe ${nome} cadastrado como ${cargo}.`);
+    try {
+      // 🔌 Enviando o POST para o nosso backend real (Rota /cadastro)
+      // Mapeamos 'cargo' para 'setor' para combinar com o que o backend espera
+      const resposta = await api.post('/cadastro', {
+        nome: nome,
+        email: email,
+        senha: senha,
+        setor: cargo 
+      });
 
-    // Limpa os campos
-    setNome('');
-    setCargo('');
-    setEmail('');
-    setSenha('');
+      // Sucesso!
+      Alert.alert('Sucesso!', resposta.data.message || `Membro da equipe ${nome} cadastrado.`);
+
+      // Limpa os campos após salvar
+      setNome('');
+      setCargo('');
+      setEmail('');
+      setSenha('');
+
+    } catch (erro) {
+      console.error(erro);
+      if (erro.response) {
+        // Erro retornado pelo backend (ex: e-mail já existe)
+        Alert.alert('Atenção', erro.response.data.error);
+      } else {
+        // Erro de rede (ex: IP errado, servidor Node desligado)
+        Alert.alert('Erro de Rede', 'Não foi possível conectar ao servidor.');
+      }
+    }
   };
 
   return (
