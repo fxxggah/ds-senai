@@ -142,6 +142,25 @@ app.delete('/produtos/:id', async (req, res) => {
   }
 });
 
+app.post('/suporte', async (req, res) => {
+  const { operador, setor, descricao } = req.body;
+  
+  if (!operador || !setor || !descricao) {
+    return res.status(400).json({ error: "Preencha todos os campos!" });
+  }
+
+  try {
+    await db.query(
+      'INSERT INTO chamados (operador, setor, descricao) VALUES (?, ?, ?)', 
+      [operador, setor, descricao]
+    );
+    console.log("Chamada enviada com sucesso!");
+    res.status(201).json({ message: "Chamado registrado." });
+  } catch (erro) {
+    res.status(500).json({ error: "Erro ao registrar o chamado." });
+  }
+});
+
 // Iniciando o servidor na porta 3003
 const PORT = process.env.PORT || 3003;
 app.listen(PORT, () => {

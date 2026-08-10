@@ -9,47 +9,52 @@ import {
   KeyboardAvoidingView,
   ScrollView,
   Platform,
-  Alert
+  Alert,
+  ActivityIndicator
 } from 'react-native';
-import { Link, useRouter } from 'expo-router'; // Adicionado useRouter
-import api from '../services/api'; // 🔌 Importando nossa conexão com o backend
+import * as Haptics from 'expo-haptics';
+import { Link, useRouter } from 'expo-router'; 
+import { useNetInfo } from '@react-native-community/netinfo'; // 🔌 1. Importando o NetInfo
+import api from '../services/api'; 
 
 export default function TelaLogin() {
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
-  const router = useRouter(); // Preparando para redirecionar o usuário no futuro
+  const [carregando, setCarregando] = useState(false); 
+  
+  const router = useRouter(); 
+  const netInfo = useNetInfo(); // 🔌 2. Capturando o status da rede
 
-  // 🔌 Transformando a função em assíncrona (async)
   const fazerLogin = async () => {
-    // Trocamos o alert da web pelo Alert nativo do celular
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+
     if (email === '' || senha === '') {
-      Alert.alert('Atenção', 'Preencha e-mail e senha para acessar o estoque!');
+      Alert.alert('Atenção', 'Preencha e-mail e senha!');
       return;
     }
     
+    setCarregando(true);
+
     try {
-      // 🔌 Enviando o POST para o nosso backend real (Rota /login)
       const resposta = await api.post('/login', {
         email: email,
         senha: senha
       });
 
-      // Pega o nome retornado do banco de dados (se houver) ou mostra aviso padrão
       const nomeUsuario = resposta.data.usuario?.nome || email;
       Alert.alert('Acesso Permitido', `Bem-vindo(a), ${nomeUsuario}!`);
       
-      // Aqui entrará a navegação para a próxima tela na Aula 6
-      // router.replace('/(tabs)');
-
+      router.replace('/(tabs)/home');
+      
     } catch (erro) {
       console.error(erro);
       if (erro.response) {
-        // Erro 401: Senha incorreta ou email não existe
         Alert.alert('Acesso Negado', erro.response.data.error);
       } else {
-        // Erro de rede (IP errado ou servidor offline)
-        Alert.alert('Erro', 'Servidor offline ou IP incorreto.');
+        Alert.alert('Erro de Conexão', 'Servidor offline ou IP incorreto.');
       }
+    } finally {
+      setCarregando(false);
     }
   };
 
@@ -66,6 +71,15 @@ export default function TelaLogin() {
       >
         <StatusBar barStyle="light-content" backgroundColor="#1e1e1e" />
         
+        {/* 🔌 3. Banner vermelho que só aparece se estiver offline */}
+        {netInfo.isConnected === false && (
+          <View style={styles.bannerOffline}>
+            <Text style={styles.textoOffline}>
+              ⚠️ Dispositivo Offline. Verifique sua conexão com a rede da fábrica.
+            </Text>
+          </View>
+        )}
+
         <Text style={styles.titulo}>InfoEstoque</Text>
         <Text style={styles.subtitulo}>Gestão de Peças e Periféricos</Text>
         
@@ -86,14 +100,26 @@ export default function TelaLogin() {
           onChangeText={setSenha}
         />
         
-        <TouchableOpacity style={styles.botao} onPress={fazerLogin}>
-          <Text style={styles.botaoTexto}>ACESSAR ESTOQUE</Text>
+        {/* 🔌 4. Botão desabilita e fica cinza se estiver offline ou carregando */}
+        <TouchableOpacity 
+          style={[
+            styles.botao, 
+            (carregando || netInfo.isConnected === false) && styles.botaoDesabilitado
+          ]} 
+          onPress={fazerLogin}
+          disabled={carregando || netInfo.isConnected === false} 
+        >
+          {carregando ? (
+            <ActivityIndicator size="small" color="#FFFFFF" />
+          ) : (
+            <Text style={styles.botaoTexto}>ACESSAR ESTOQUE</Text>
+          )}
         </TouchableOpacity>
         
         <View style={styles.linksContainer}>
           <Link href="/cadastro" style={styles.linkText}>Criar Conta</Link>
           <Text style={{color: '#ccc', marginHorizontal: 10}}>|</Text>
-          <Link href="/recuperar" style={styles.linkText}>Esqueci a Senha</Link>
+          <Link href="/suporte" style={styles.linkText}>Suporte</Link>
           <Text style={{color: '#ccc', marginHorizontal: 10}}>|</Text>
           <Link href="/produto" style={styles.linkText}>+ Novo Produto</Link>
         </View>
@@ -104,13 +130,31 @@ export default function TelaLogin() {
   );
 }
 
-// Seu estilo incrível permanece 100% igual!
 export const styles = StyleSheet.create({
   scrollContainer: {
     flexGrow: 1, 
     padding: 24, 
     backgroundColor: '#F8FAFC', 
     justifyContent: 'center', 
+  },
+  // 🔌 Estilos adicionados para o Banner e Botão Desabilitado
+  bannerOffline: {
+    backgroundColor: '#EF4444',
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 20,
+    alignItems: 'center',
+  },
+  textoOffline: {
+    color: '#FFFFFF',
+    fontWeight: 'bold',
+    fontSize: 14,
+    textAlign: 'center',
+  },
+  botaoDesabilitado: {
+    backgroundColor: '#94A3B8',
+    elevation: 0,
+    shadowOpacity: 0,
   },
   titulo: {
     fontSize: 34, 

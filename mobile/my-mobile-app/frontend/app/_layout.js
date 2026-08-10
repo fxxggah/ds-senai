@@ -8,7 +8,7 @@ export default function LayoutRaiz() {
       
       {/* Adicione estas duas linhas: */}
       <Stack.Screen name="cadastro" options={{ title: 'Cadastrar Equipe' }} />
-      <Stack.Screen name="recuperar" options={{ title: 'Recuperar Senha' }} />
+      <Stack.Screen name="suporte" options={{ title: 'suporte Senha' }} />
     </Stack>
   );
 }
