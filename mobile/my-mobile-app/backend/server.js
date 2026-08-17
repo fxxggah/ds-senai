@@ -2,20 +2,23 @@ require('dotenv').config();
 
 const express = require('express');
 const cors = require('cors');
+const multer = require('multer'); // Importando o Multer
 const db = require('./db'); // Conexão com o MySQL
 
 const app = express();
+
+// Configuração do Multer para guardar a foto na memória RAM
+const upload = multer({ storage: multer.memoryStorage() });
 
 app.use(cors());
 app.use(express.json());
 
 // ==========================================
-// --- ROTAS DE AUTENTICAÇÃO (NOVO) ---
+// --- ROTAS DE AUTENTICAÇÃO E PERFIL ---
 // ==========================================
 
 // 1. Rota POST: Cadastrar novo funcionário
 app.post('/cadastro', async (req, res) => {
-  // O frontend envia: nome, email, senha, setor
   const { nome, email, senha, setor } = req.body;
 
   if (!nome || !email || !senha) {
@@ -31,7 +34,6 @@ app.post('/cadastro', async (req, res) => {
 
   } catch (erro) {
     console.error(erro);
-    // Verifica se o erro é de e-mail duplicado no banco (código ER_DUP_ENTRY do MySQL)
     if (erro.code === 'ER_DUP_ENTRY') {
       return res.status(400).json({ error: "Este e-mail já está cadastrado no sistema." });
     }
@@ -48,16 +50,13 @@ app.post('/login', async (req, res) => {
   }
 
   try {
-    // Busca no banco se existe alguém com este email e senha
     const query = 'SELECT * FROM usuarios WHERE email = ? AND senha = ?';
     const [linhas] = await db.query(query, [email, senha]);
 
-    // Se o array de linhas for maior que 0, o usuário foi encontrado
     if (linhas.length > 0) {
       const usuarioEncontrado = linhas[0];
       console.log(`[AUTH] Login efetuado por: ${usuarioEncontrado.email}`);
       
-      // Retorna sucesso e os dados do usuário para o frontend usar (como o nome no Alert)
       res.status(200).json({
         message: "Login aprovado",
         usuario: {
@@ -68,7 +67,6 @@ app.post('/login', async (req, res) => {
         }
       });
     } else {
-      // Se não encontrou, credenciais inválidas
       res.status(401).json({ error: "E-mail ou senha incorretos." });
     }
   } catch (erro) {
@@ -77,9 +75,77 @@ app.post('/login', async (req, res) => {
   }
 });
 
+// 3. Rota GET: Buscar perfil do usuário por ID (Atualizado para buscar a foto)
+app.get('/usuarios/:id', async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const query = 'SELECT id, nome, email, setor, turno, foto FROM usuarios WHERE id = ?';
+    const [linhas] = await db.query(query, [id]);
+
+    if (linhas.length === 0) {
+      return res.status(404).json({ error: "Usuário não encontrado." });
+    }
+
+    const usuario = linhas[0];
+    if (usuario.foto) {
+      usuario.foto = usuario.foto.toString('base64');
+    }
+
+    res.status(200).json(usuario);
+  } catch (erro) {
+    console.error(erro);
+    res.status(500).json({ error: "Erro ao buscar dados do perfil." });
+  }
+});
+
+// 4. Rota PATCH: Atualizar APENAS a foto (NOVO)
+app.patch('/usuarios/:id/foto', upload.single('foto'), async (req, res) => {
+  try {
+      const fotoBuffer = req.file ? req.file.buffer : null;
+      
+      if (!fotoBuffer) {
+          return res.status(400).json({ error: "Nenhuma foto foi enviada." });
+      }
+
+      await db.query('UPDATE usuarios SET foto = ? WHERE id = ?', [fotoBuffer, req.params.id]);
+      res.json({ message: "Foto do perfil atualizada com sucesso!" });
+  } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: "Erro ao salvar a foto" });
+  }
+});
+
+// 5. Rota DELETE: Excluir Perfil do Usuário (NOVO)
+app.delete('/usuarios/:id', async (req, res) => {
+  try {
+      await db.query('DELETE FROM usuarios WHERE id = ?', [req.params.id]);
+      res.json({ message: "Conta excluída." });
+  } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: "Erro ao excluir conta." });
+  }
+});
+
+// 6. Rota PUT: Atualizar Setor e Turno
+app.put('/usuarios/:id', async (req, res) => {
+  const { setor, turno } = req.body;
+  
+  try {
+      await db.query(
+        'UPDATE usuarios SET setor = ?, turno = ? WHERE id = ?', 
+        [setor, turno, req.params.id]
+      );
+      res.json({ message: "Perfil atualizado com sucesso!" });
+  } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: "Erro ao atualizar perfil" });
+  }
+});
+
 
 // ==========================================
-// --- ROTAS DE PRODUTOS (MANTIDAS) ---
+// --- ROTAS DE PRODUTOS E SUPORTE ---
 // ==========================================
 
 // Rota GET: Buscar produtos do MySQL
@@ -161,25 +227,6 @@ app.post('/suporte', async (req, res) => {
   }
 });
 
-// Rota GET: Buscar perfil do usuário por ID
-app.get('/usuarios/:id', async (req, res) => {
-  const { id } = req.params;
-
-  try {
-    const query = 'SELECT id, nome, email, setor FROM usuarios WHERE id = ?';
-    const [linhas] = await db.query(query, [id]);
-
-    if (linhas.length === 0) {
-      return res.status(404).json({ error: "Usuário não encontrado." });
-    }
-
-    // Retorna os dados do usuário encontrado
-    res.status(200).json(linhas[0]);
-  } catch (erro) {
-    console.error(erro);
-    res.status(500).json({ error: "Erro ao buscar dados do perfil." });
-  }
-});
 
 // Iniciando o servidor na porta 3003
 const PORT = process.env.PORT || 3003;

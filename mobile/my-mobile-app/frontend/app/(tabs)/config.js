@@ -1,26 +1,69 @@
-import { useState } from 'react'; // 1. Importado useState
-import { View, Text, TouchableOpacity, StyleSheet, Modal } from 'react-native'; // 2. Importado Modal
+import { useState } from 'react'; 
+import { View, Text, TouchableOpacity, StyleSheet, Modal, Alert } from 'react-native'; 
 import { useRouter } from 'expo-router';
+import AsyncStorage from '@react-native-async-storage/async-storage'; // 💾 Importação necessária
+import api from '../../services/api'; // 🌐 Importação da sua API
 
 export default function TelaConfig() {
-  const [modalVisivel, setModalVisivel] = useState(false); // 3. Estado do modal
+  const [modalVisivel, setModalVisivel] = useState(false); 
   const router = useRouter();
 
-  const fazerLogout = () => {
+  // Função Original: Logout
+  const fazerLogout = async () => {
     setModalVisivel(false);
+    await AsyncStorage.removeItem('usuarioId'); // Importante limpar o cache ao sair
     router.replace('/');
+  };
+
+  // 🚀 Nova Função: Excluir a conta dinamicamente
+  const deletarConta = async () => {
+    try {
+      const idSalvo = await AsyncStorage.getItem('usuarioId');
+
+      if (!idSalvo) {
+        return Alert.alert('Erro', 'Nenhum usuário logado encontrado.');
+      }
+
+      await api.delete(`/usuarios/${idSalvo}`);
+
+      Alert.alert('Sucesso', 'Sua conta foi excluída permanentemente.');
+      await AsyncStorage.removeItem('usuarioId'); // Limpa a memória
+      router.replace('/'); // Joga pra tela de login
+    } catch (erro) {
+      console.error(erro);
+      Alert.alert('Erro', 'Não foi possível excluir a conta no momento.');
+    }
+  };
+
+  // 🛡️ Alerta de segurança nativo do SO para não excluir sem querer
+  const confirmarExclusao = () => {
+    Alert.alert(
+      'Atenção! Ação Irreversível',
+      'Tem certeza que deseja excluir seu perfil corporativo? Você perderá o acesso ao InfoEstoque.',
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        { text: 'Sim, excluir', style: 'destructive', onPress: deletarConta }
+      ]
+    );
   };
 
   return (
     <View style={styles.container}>
       <Text style={styles.titulo}>Configurações da Conta</Text>
       
-      {/* O botão agora apenas abre o Modal */}
+      {/* Botão de Logout abre o SEU Modal */}
       <TouchableOpacity style={styles.botaoSair} onPress={() => setModalVisivel(true)}>
         <Text style={styles.textoBotaoSair}>Sair do Sistema</Text>
       </TouchableOpacity>
 
-      {/* 🚀 Modal de Confirmação */}
+      <View style={styles.linhaDivisoria} />
+
+      {/* 🚀 Novo Botão de Excluir Conta */}
+      <TouchableOpacity style={styles.botaoExcluir} onPress={confirmarExclusao}>
+        <Text style={styles.textoBotaoExcluir}>Excluir Minha Conta</Text>
+      </TouchableOpacity>
+
+      {/* Modal de Confirmação de Logout */}
       <Modal
         animationType="fade"
         transparent={true}
@@ -56,11 +99,17 @@ export default function TelaConfig() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 20, backgroundColor: '#f5f5f5', justifyContent: 'center' },
-  titulo: { fontSize: 20, fontWeight: 'bold', marginBottom: 20, textAlign: 'center' },
-  botaoSair: { backgroundColor: '#cc0000', padding: 15, borderRadius: 8, alignItems: 'center' },
-  textoBotaoSair: { color: '#ffffff', fontSize: 16, fontWeight: 'bold' },
+  titulo: { fontSize: 20, fontWeight: 'bold', marginBottom: 20, textAlign: 'center', color: '#333' },
   
-  // Novos estilos do Modal
+  botaoSair: { backgroundColor: '#003366', padding: 15, borderRadius: 8, alignItems: 'center' }, // Mudei para Azul para ser ação padrão
+  textoBotaoSair: { color: '#ffffff', fontSize: 16, fontWeight: 'bold' },
+
+  linhaDivisoria: { height: 1, backgroundColor: '#cccccc', marginVertical: 40 },
+
+  botaoExcluir: { backgroundColor: 'transparent', borderWidth: 2, borderColor: '#cc0000', padding: 15, borderRadius: 8, alignItems: 'center' },
+  textoBotaoExcluir: { color: '#cc0000', fontSize: 16, fontWeight: 'bold' },
+  
+  // Estilos do Modal (Mantidos iguais ao seu original)
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
