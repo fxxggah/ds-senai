@@ -26,7 +26,8 @@ export default function TelaStatus() {
         return;
       }
 
-      const resposta = await api.get(`/usuarios/${idSalvo}`);
+      // ✅ Atualizado com o prefixo do Gateway
+      const resposta = await api.get(`/api/perfil/usuarios/${idSalvo}`);
       setUsuario(resposta.data);
       
       setNovoSetor(resposta.data.setor || '');
@@ -40,7 +41,6 @@ export default function TelaStatus() {
     }
   };
 
-  // 📸 Função auxiliar para processar e enviar a foto (seja da câmera ou da galeria)
   const enviarFotoParaServidor = async (imagemSelecionada) => {
     setCarregandoFoto(true);
     try {
@@ -54,7 +54,8 @@ export default function TelaStatus() {
 
       const idSalvo = await AsyncStorage.getItem('usuarioId');
 
-      await api.patch(`/usuarios/${idSalvo}/foto`, formData, {
+      // ✅ Atualizado com o prefixo do Gateway
+      await api.patch(`/api/perfil/usuarios/${idSalvo}/foto`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
 
@@ -68,9 +69,7 @@ export default function TelaStatus() {
     }
   };
 
-  // 📷 Option 1: Tirar Foto usando a Câmera Física
   const tirarFotoComCamera = async () => {
-    // 1. Pede permissão para acessar a câmera
     const permissao = await ImagePicker.requestCameraPermissionsAsync();
 
     if (!permissao.granted) {
@@ -78,7 +77,6 @@ export default function TelaStatus() {
       return;
     }
 
-    // 2. Abre a Câmera
     let resultado = await ImagePicker.launchCameraAsync({
       mediaTypes: ['images'],
       allowsEditing: true,
@@ -91,7 +89,6 @@ export default function TelaStatus() {
     }
   };
 
-  // 🖼️ Option 2: Escolher foto existente da Galeria
   const escolherDaGaleria = async () => {
     let resultado = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ['images'],
@@ -105,7 +102,6 @@ export default function TelaStatus() {
     }
   };
 
-  // 🚀 Menu seletor disparado ao clicar no botão da Foto
   const menuOpcoesFoto = () => {
     Alert.alert(
       'Atualizar Foto do Crachá',
@@ -123,7 +119,8 @@ export default function TelaStatus() {
     try {
       const idSalvo = await AsyncStorage.getItem('usuarioId');
       
-      await api.put(`/usuarios/${idSalvo}`, {
+      // ✅ Atualizado com o prefixo do Gateway
+      await api.put(`/api/perfil/usuarios/${idSalvo}`, {
         setor: novoSetor,
         turno: novoTurno
       });
@@ -149,7 +146,6 @@ export default function TelaStatus() {
     >
       <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
         
-        {/* Foto do Crachá */}
         <View style={styles.fotoContainer}>
           <Image source={imagemExibicao} style={styles.foto} />
           <TouchableOpacity 
@@ -163,7 +159,6 @@ export default function TelaStatus() {
           </TouchableOpacity>
         </View>
 
-        {/* Informações */}
         {carregando ? (
           <ActivityIndicator size="large" color="#003366" style={{ marginTop: 20 }} />
         ) : (

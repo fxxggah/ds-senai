@@ -12,6 +12,12 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static('public')); // Serve o painel do RH em HTML
 
+// Middleware de Log para monitorar conexões no terminal
+app.use((req, res, next) => {
+  console.log(`[BACKEND 3003] Requisição recebida: ${req.method} ${req.url}`);
+  next();
+});
+
 // ==========================================
 // --- ROTAS DE RECUPERAÇÃO DE SENHA E RH ---
 // ==========================================
@@ -94,6 +100,7 @@ app.post('/cadastro', async (req, res) => {
 });
 
 app.post('/login', async (req, res) => {
+  console.log('[AUTH] Dados recebidos para login:', req.body);
   const { email, senha } = req.body;
 
   if (!email || !senha) {
@@ -106,7 +113,7 @@ app.post('/login', async (req, res) => {
 
     if (linhas.length > 0) {
       const usuarioEncontrado = linhas[0];
-      console.log(`[AUTH] Login efetuado por: ${usuarioEncontrado.email}`);
+      console.log(`[AUTH] Login aprovado para: ${usuarioEncontrado.email}`);
       
       res.status(200).json({
         message: "Login aprovado",
@@ -118,6 +125,7 @@ app.post('/login', async (req, res) => {
         }
       });
     } else {
+      console.log(`[AUTH] Falha de login para: ${email} (Credenciais incorretas)`);
       res.status(401).json({ error: "E-mail ou senha incorretos." });
     }
   } catch (erro) {

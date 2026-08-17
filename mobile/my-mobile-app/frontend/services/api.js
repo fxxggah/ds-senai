@@ -1,9 +1,10 @@
 import axios from 'axios';
 
+// IPv4 da sua máquina na rede local
+const MEU_IP = '10.226.170.175'; 
+
 const api = axios.create({
-  // ⚠️ IMPORTANTE: Troque o IP abaixo pelo IPv4 que você anotou no Passo 2!
-  // ATENÇÃO: A porta aqui é a 3003 (porta do backend do estoque_info)
-  baseURL: 'http://10.226.170.175:3003',
+  baseURL: `http://${MEU_IP}:3000`, 
   headers: {
     'Content-Type': 'application/json',
   }

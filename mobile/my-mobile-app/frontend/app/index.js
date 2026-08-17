@@ -37,7 +37,8 @@ export default function TelaLogin() {
     setCarregando(true);
 
     try {
-      const resposta = await api.post('/login', {
+      // ✅ Atualizado com o prefixo do Gateway
+      const resposta = await api.post('/api/auth/login', {
         email: email,
         senha: senha
       });
@@ -106,7 +107,6 @@ export default function TelaLogin() {
           onChangeText={setSenha}
         />
 
-        {/* Link direto para a tela de recuperação */}
         <TouchableOpacity 
           style={styles.containerEsqueceuSenha}
           onPress={() => router.push('/recuperar')}

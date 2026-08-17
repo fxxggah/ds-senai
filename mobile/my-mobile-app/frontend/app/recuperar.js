@@ -27,7 +27,8 @@ export default function TelaRecuperar() {
     setCarregando(true);
 
     try {
-      const res = await api.post('/recuperar', { email });
+      // ✅ Atualizado com o prefixo do Gateway
+      const res = await api.post('/api/auth/recuperar', { email });
 
       Alert.alert('Solicitação Enviada', res.data.message);
       setEmail('');

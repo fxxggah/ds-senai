@@ -1,21 +1,19 @@
 import { useState } from 'react'; 
 import { View, Text, TouchableOpacity, StyleSheet, Modal, Alert } from 'react-native'; 
 import { useRouter } from 'expo-router';
-import AsyncStorage from '@react-native-async-storage/async-storage'; // 💾 Importação necessária
-import api from '../../services/api'; // 🌐 Importação da sua API
+import AsyncStorage from '@react-native-async-storage/async-storage'; 
+import api from '../../services/api'; 
 
 export default function TelaConfig() {
   const [modalVisivel, setModalVisivel] = useState(false); 
   const router = useRouter();
 
-  // Função Original: Logout
   const fazerLogout = async () => {
     setModalVisivel(false);
-    await AsyncStorage.removeItem('usuarioId'); // Importante limpar o cache ao sair
+    await AsyncStorage.removeItem('usuarioId'); 
     router.replace('/');
   };
 
-  // 🚀 Nova Função: Excluir a conta dinamicamente
   const deletarConta = async () => {
     try {
       const idSalvo = await AsyncStorage.getItem('usuarioId');
@@ -24,18 +22,18 @@ export default function TelaConfig() {
         return Alert.alert('Erro', 'Nenhum usuário logado encontrado.');
       }
 
-      await api.delete(`/usuarios/${idSalvo}`);
+      // ✅ Atualizado com o prefixo do Gateway
+      await api.delete(`/api/perfil/usuarios/${idSalvo}`);
 
       Alert.alert('Sucesso', 'Sua conta foi excluída permanentemente.');
-      await AsyncStorage.removeItem('usuarioId'); // Limpa a memória
-      router.replace('/'); // Joga pra tela de login
+      await AsyncStorage.removeItem('usuarioId'); 
+      router.replace('/'); 
     } catch (erro) {
       console.error(erro);
       Alert.alert('Erro', 'Não foi possível excluir a conta no momento.');
     }
   };
 
-  // 🛡️ Alerta de segurança nativo do SO para não excluir sem querer
   const confirmarExclusao = () => {
     Alert.alert(
       'Atenção! Ação Irreversível',
@@ -51,19 +49,16 @@ export default function TelaConfig() {
     <View style={styles.container}>
       <Text style={styles.titulo}>Configurações da Conta</Text>
       
-      {/* Botão de Logout abre o SEU Modal */}
       <TouchableOpacity style={styles.botaoSair} onPress={() => setModalVisivel(true)}>
         <Text style={styles.textoBotaoSair}>Sair do Sistema</Text>
       </TouchableOpacity>
 
       <View style={styles.linhaDivisoria} />
 
-      {/* 🚀 Novo Botão de Excluir Conta */}
       <TouchableOpacity style={styles.botaoExcluir} onPress={confirmarExclusao}>
         <Text style={styles.textoBotaoExcluir}>Excluir Minha Conta</Text>
       </TouchableOpacity>
 
-      {/* Modal de Confirmação de Logout */}
       <Modal
         animationType="fade"
         transparent={true}
@@ -101,7 +96,7 @@ const styles = StyleSheet.create({
   container: { flex: 1, padding: 20, backgroundColor: '#f5f5f5', justifyContent: 'center' },
   titulo: { fontSize: 20, fontWeight: 'bold', marginBottom: 20, textAlign: 'center', color: '#333' },
   
-  botaoSair: { backgroundColor: '#003366', padding: 15, borderRadius: 8, alignItems: 'center' }, // Mudei para Azul para ser ação padrão
+  botaoSair: { backgroundColor: '#003366', padding: 15, borderRadius: 8, alignItems: 'center' }, 
   textoBotaoSair: { color: '#ffffff', fontSize: 16, fontWeight: 'bold' },
 
   linhaDivisoria: { height: 1, backgroundColor: '#cccccc', marginVertical: 40 },
@@ -109,7 +104,6 @@ const styles = StyleSheet.create({
   botaoExcluir: { backgroundColor: 'transparent', borderWidth: 2, borderColor: '#cc0000', padding: 15, borderRadius: 8, alignItems: 'center' },
   textoBotaoExcluir: { color: '#cc0000', fontSize: 16, fontWeight: 'bold' },
   
-  // Estilos do Modal (Mantidos iguais ao seu original)
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
