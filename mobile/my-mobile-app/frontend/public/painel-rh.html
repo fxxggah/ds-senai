@@ -3,6 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <title>Painel do RH - InfoEstoque</title>
+  
+  <!-- Estilização interna da interface web do RH -->
   <style>
     body { font-family: Arial, sans-serif; background-color: #f0f2f5; margin: 0; padding: 20px; }
     .container { max-width: 800px; margin: 0 auto; background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
@@ -17,10 +19,15 @@
 </head>
 <body>
 
+  <!-- =========================================================
+       PAINEL WEB DO RH - REDEFINIÇÃO DE SENHAS
+       Gerencia solicitações de recuperação enviadas pelo App
+       ========================================================= -->
   <div class="container">
     <h1>🏭 Painel do RH - Redefinição de Senhas</h1>
     <p>Abaixo estão os operadores do InfoEstoque que solicitaram redefinição pelo app móvel:</p>
 
+    <!-- Tabela para exibição das solicitações pendentes -->
     <table id="tabela-solicitacoes">
       <thead>
         <tr>
@@ -33,12 +40,17 @@
       <tbody id="corpo-tabela"></tbody>
     </table>
 
+    <!-- Mensagem exibida quando não há pendências -->
     <div id="mensagem-vazia" class="empty-msg" style="display: none;">
       Nenhuma solicitação pendente no momento.
     </div>
   </div>
 
   <script>
+    // =========================================================
+    // FUNÇÃO: Busca chamados de redefinição de senha na API
+    // Conecta diretamente ao microserviço de perfil/auth (porta 3003)
+    // =========================================================
     async function carregarSolicitacoes() {
       const res = await fetch('http://localhost:3003/rh/solicitacoes');
       const dados = await res.json();
@@ -47,6 +59,7 @@
 
       tabela.innerHTML = '';
 
+      // Trata estado sem solicitações
       if (dados.length === 0) {
         msgVazia.style.display = 'block';
         return;
@@ -54,6 +67,7 @@
 
       msgVazia.style.display = 'none';
 
+      // Renderiza cada linha da tabela com a solicitação do operador
       dados.forEach(item => {
         const linha = document.createElement('tr');
         const dataFormatada = new Date(item.data_solicitacao).toLocaleString('pt-BR');
@@ -72,6 +86,9 @@
       });
     }
 
+    // =========================================================
+    // FUNÇÃO: Reseta a senha do operador para o valor padrão ('senai123')
+    // =========================================================
     async function resetarSenha(email, idSolicitacao) {
       if (!confirm(`Deseja redefinir a senha do operador ${email} para 'senai123'?`)) return;
 
@@ -83,9 +100,12 @@
 
       const resultado = await res.json();
       alert(resultado.message);
+      
+      // Recarrega a tabela para atualizar a lista de pendências
       carregarSolicitacoes();
     }
 
+    // Carregamento inicial ao abrir a página
     carregarSolicitacoes();
   </script>
 </body>

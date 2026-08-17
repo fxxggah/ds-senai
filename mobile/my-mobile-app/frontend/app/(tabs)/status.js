@@ -4,19 +4,30 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as ImagePicker from 'expo-image-picker'; 
 import api from '../../services/api'; 
 
+// =========================================================
+// TELA DE STATUS E PERFIL DO OPERADOR
+// Permite visualização e atualização de foto (crachá), setor e turno
+// =========================================================
+
 export default function TelaStatus() {
+  // Estados para controle de dados e carregamento
   const [usuario, setUsuario] = useState(null);
   const [carregando, setCarregando] = useState(true);
   const [carregandoFoto, setCarregandoFoto] = useState(false);
   const [salvando, setSalvando] = useState(false);
 
+  // Estados para edição dos campos mutáveis
   const [novoSetor, setNovoSetor] = useState('');
   const [novoTurno, setNovoTurno] = useState('');
 
+  // Busca os dados do perfil ao carregar a tela
   useEffect(() => {
     carregarPerfil();
   }, []);
 
+  // =========================================================
+  // FUNÇÃO: Busca dados do usuário via API Gateway
+  // =========================================================
   const carregarPerfil = async () => {
     try {
       const idSalvo = await AsyncStorage.getItem('usuarioId');
@@ -26,7 +37,7 @@ export default function TelaStatus() {
         return;
       }
 
-      // ✅ Atualizado com o prefixo do Gateway
+      // Rota mapeada no API Gateway: /api/perfil/usuarios/:id -> Backend:3003
       const resposta = await api.get(`/api/perfil/usuarios/${idSalvo}`);
       setUsuario(resposta.data);
       
@@ -41,6 +52,11 @@ export default function TelaStatus() {
     }
   };
 
+  // =========================================================
+  // FUNÇÕES DE UPLOAD E CAPTURA DE FOTO DE PERFIL
+  // =========================================================
+
+  // Envia a imagem em formato multipart/form-data via Gateway
   const enviarFotoParaServidor = async (imagemSelecionada) => {
     setCarregandoFoto(true);
     try {
@@ -54,7 +70,7 @@ export default function TelaStatus() {
 
       const idSalvo = await AsyncStorage.getItem('usuarioId');
 
-      // ✅ Atualizado com o prefixo do Gateway
+      // Rota PATCH enviada via API Gateway
       await api.patch(`/api/perfil/usuarios/${idSalvo}/foto`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
@@ -69,6 +85,7 @@ export default function TelaStatus() {
     }
   };
 
+  // Captura foto usando a câmera do dispositivo
   const tirarFotoComCamera = async () => {
     const permissao = await ImagePicker.requestCameraPermissionsAsync();
 
@@ -89,6 +106,7 @@ export default function TelaStatus() {
     }
   };
 
+  // Seleciona foto da galeria do dispositivo
   const escolherDaGaleria = async () => {
     let resultado = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ['images'],
@@ -102,6 +120,7 @@ export default function TelaStatus() {
     }
   };
 
+  // Menu suspenso para escolha da origem da imagem
   const menuOpcoesFoto = () => {
     Alert.alert(
       'Atualizar Foto do Crachá',
@@ -114,12 +133,15 @@ export default function TelaStatus() {
     );
   };
 
+  // =========================================================
+  // FUNÇÃO: Atualização de Setor e Turno
+  // =========================================================
   const salvarAlteracoes = async () => {
     setSalvando(true);
     try {
       const idSalvo = await AsyncStorage.getItem('usuarioId');
       
-      // ✅ Atualizado com o prefixo do Gateway
+      // Rota PUT enviada via API Gateway
       await api.put(`/api/perfil/usuarios/${idSalvo}`, {
         setor: novoSetor,
         turno: novoTurno
@@ -135,6 +157,7 @@ export default function TelaStatus() {
     }
   };
 
+  // Trata exibição da imagem: se não houver foto em Base64 no banco, exibe avatar padrão
   const imagemExibicao = usuario?.foto 
     ? { uri: `data:image/jpeg;base64,${usuario.foto}` }
     : { uri: 'https://cdn-icons-png.flaticon.com/512/149/149071.png' };
@@ -146,6 +169,7 @@ export default function TelaStatus() {
     >
       <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
         
+        {/* Seção da Foto de Perfil (Crachá) */}
         <View style={styles.fotoContainer}>
           <Image source={imagemExibicao} style={styles.foto} />
           <TouchableOpacity 
@@ -159,10 +183,12 @@ export default function TelaStatus() {
           </TouchableOpacity>
         </View>
 
+        {/* Indicador de carregamento ou formulário com os dados */}
         {carregando ? (
           <ActivityIndicator size="large" color="#003366" style={{ marginTop: 20 }} />
         ) : (
           <View style={styles.dadosContainer}>
+            {/* Informações fixas do operador */}
             <Text style={styles.label}>Nome do Operador:</Text>
             <Text style={styles.valorFixo}>{usuario?.nome || 'Não informado'}</Text>
 
@@ -172,6 +198,7 @@ export default function TelaStatus() {
             <View style={styles.linhaDivisoria} />
             <Text style={styles.tituloEdicao}>Informações de Trabalho</Text>
 
+            {/* Edição de Setor e Turno */}
             <Text style={styles.label}>Setor / Área:</Text>
             <TextInput
               style={styles.input}
@@ -188,6 +215,7 @@ export default function TelaStatus() {
               placeholder="Ex: Manhã, Tarde, Noite..."
             />
 
+            {/* Botão de salvar edições */}
             <TouchableOpacity 
               style={[styles.botaoSalvar, salvando && { opacity: 0.7 }]} 
               onPress={salvarAlteracoes}
@@ -204,6 +232,10 @@ export default function TelaStatus() {
     </KeyboardAvoidingView>
   );
 }
+
+// =========================================================
+// ESTILIZAÇÃO COMPONENTE (StyleSheet)
+// =========================================================
 
 const styles = StyleSheet.create({
   container: { flexGrow: 1, padding: 20, backgroundColor: '#f5f5f5', alignItems: 'center' },

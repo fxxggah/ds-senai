@@ -1,17 +1,28 @@
 import { Tabs } from 'expo-router';
-import { FontAwesome } from '@expo/vector-icons'; // Biblioteca de ícones já inclusa no Expo
+import { FontAwesome } from '@expo/vector-icons';
+
+// =========================================================
+// LAYOUT DE NAVEGAÇÃO POR ABAS (TAB BAR)
+// Configura a barra inferior de navegação do aplicativo Expo
+// =========================================================
 
 export default function LayoutAbas() {
   return (
     <Tabs 
       screenOptions={{ 
-        tabBarActiveTintColor: '#003366', // Cor do ícone quando selecionado
-        tabBarInactiveTintColor: '#cccccc', // Cor quando inativo
-        headerStyle: { backgroundColor: '#003366' }, // Fundo do cabeçalho
-        headerTintColor: '#ffffff', // Cor do texto do cabeçalho
+        // Estilização global da Tab Bar e dos Cabeçalhos
+        tabBarActiveTintColor: '#003366',   // Cor dos ícones e textos ativos
+        tabBarInactiveTintColor: '#cccccc', // Cor dos ícones e textos inativos
+        headerStyle: { backgroundColor: '#003366' }, // Cor de fundo do topo da tela
+        headerTintColor: '#ffffff',         // Cor do título e botões no topo
       }}
     >
-      {/* Aba 1: Tela Principal / Dashboard */}
+      {/* 
+        =========================================================
+        ABA 1: HOME / DASHBOARD
+        Mapeia o arquivo: app/(tabs)/home.js
+        =========================================================
+      */}
       <Tabs.Screen 
         name="home" 
         options={{
@@ -20,7 +31,12 @@ export default function LayoutAbas() {
         }} 
       />
       
-      {/* Aba 2: Tela de Status / Perfil */}
+      {/* 
+        =========================================================
+        ABA 2: STATUS / PERFIL DO OPERADOR
+        Mapeia o arquivo: app/(tabs)/status.js
+        =========================================================
+      */}
       <Tabs.Screen 
         name="status" 
         options={{
@@ -29,7 +45,12 @@ export default function LayoutAbas() {
         }} 
       />
 
-      {/* Aba 3: Tela de Configurações (Logout) */}
+      {/* 
+        =========================================================
+        ABA 3: CONFIGURAÇÕES / AJUSTES E LOGOUT
+        Mapeia o arquivo: app/(tabs)/config.js
+        =========================================================
+      */}
       <Tabs.Screen 
         name="config" 
         options={{

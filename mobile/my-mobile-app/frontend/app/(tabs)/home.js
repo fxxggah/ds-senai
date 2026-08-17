@@ -1,10 +1,18 @@
 import { View, Text, StyleSheet } from 'react-native';
 
+// =========================================================
+// TELA INICIAL / DASHBOARD DA ÁREA RESTRITA
+// Mapeia a primeira aba do aplicativo (app/(tabs)/home.js)
+// Exibe os avisos gerais e comunicados da fábrica
+// =========================================================
+
 export default function TelaInicialRestrita() {
   return (
     <View style={styles.container}>
+      {/* Título principal do painel */}
       <Text style={styles.boasVindas}>Painel de Controle</Text>
       
+      {/* Card Informativo: Mural de avisos corporativos */}
       <View style={styles.cardInfo}>
         <Text style={styles.tituloCard}>Avisos da Fábrica</Text>
         <Text style={styles.textoCard}>- Reunião de CIPA às 14h.</Text>
@@ -13,6 +21,10 @@ export default function TelaInicialRestrita() {
     </View>
   );
 }
+
+// =========================================================
+// ESTILIZAÇÃO COMPONENTE (StyleSheet)
+// =========================================================
 
 const styles = StyleSheet.create({
   container: {

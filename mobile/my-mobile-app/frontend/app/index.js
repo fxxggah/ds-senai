@@ -18,17 +18,30 @@ import { useNetInfo } from '@react-native-community/netinfo';
 import AsyncStorage from '@react-native-async-storage/async-storage'; 
 import api from '../services/api'; 
 
+// =========================================================
+// TELA DE LOGIN / AUTENTICAÇÃO
+// Responsável por validar as credenciais do usuário, 
+// armazenar a sessão localmente e gerenciar o estado de conexão
+// =========================================================
+
 export default function TelaLogin() {
+  // Estados para inputs e estado de carregamento
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
   const [carregando, setCarregando] = useState(false); 
   
+  // Hooks de navegação e verificação de rede
   const router = useRouter(); 
   const netInfo = useNetInfo();
 
+  // =========================================================
+  // FUNÇÃO: Autenticação de usuário via API Gateway
+  // =========================================================
   const fazerLogin = async () => {
+    // Feedback tátil leve ao pressionar o botão
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
 
+    // Validação básica dos campos de entrada
     if (email === '' || senha === '') {
       Alert.alert('Atenção', 'Preencha e-mail e senha!');
       return;
@@ -37,7 +50,7 @@ export default function TelaLogin() {
     setCarregando(true);
 
     try {
-      // ✅ Atualizado com o prefixo do Gateway
+      // Rota enviada via API Gateway: /api/auth/login -> Backend:3003
       const resposta = await api.post('/api/auth/login', {
         email: email,
         senha: senha
@@ -45,6 +58,7 @@ export default function TelaLogin() {
 
       const usuario = resposta.data.usuario;
 
+      // Salva o ID do usuário no armazenamento local para manter a sessão
       if (usuario?.id) {
         await AsyncStorage.setItem('usuarioId', String(usuario.id));
       }
@@ -52,6 +66,7 @@ export default function TelaLogin() {
       const nomeUsuario = usuario?.nome || email;
       Alert.alert('Acesso Permitido', `Bem-vindo(a), ${nomeUsuario}!`);
       
+      // Redireciona para o painel principal na área autenticada
       router.replace('/(tabs)/home');
       
     } catch (erro) {
@@ -79,6 +94,7 @@ export default function TelaLogin() {
       >
         <StatusBar barStyle="light-content" backgroundColor="#1e1e1e" />
         
+        {/* Banner de alerta para falta de conexão com a internet */}
         {netInfo.isConnected === false && (
           <View style={styles.bannerOffline}>
             <Text style={styles.textoOffline}>
@@ -87,9 +103,11 @@ export default function TelaLogin() {
           </View>
         )}
 
+        {/* Cabeçalho da aplicação */}
         <Text style={styles.titulo}>InfoEstoque</Text>
         <Text style={styles.subtitulo}>Gestão de Peças e Periféricos</Text>
         
+        {/* Campo: E-mail */}
         <TextInput
           style={styles.input}
           placeholder="E-mail do Vendedor"
@@ -99,6 +117,7 @@ export default function TelaLogin() {
           onChangeText={setEmail}
         />
         
+        {/* Campo: Senha */}
         <TextInput
           style={styles.input}
           placeholder="Senha de Acesso"
@@ -107,6 +126,7 @@ export default function TelaLogin() {
           onChangeText={setSenha}
         />
 
+        {/* Link para recuperação de senha */}
         <TouchableOpacity 
           style={styles.containerEsqueceuSenha}
           onPress={() => router.push('/recuperar')}
@@ -114,6 +134,7 @@ export default function TelaLogin() {
           <Text style={styles.linkEsqueceuSenha}>Esqueceu a senha?</Text>
         </TouchableOpacity>
         
+        {/* Botão de Entrar (Desabilitado se estiver sem rede ou carregando) */}
         <TouchableOpacity 
           style={[
             styles.botao, 
@@ -129,6 +150,7 @@ export default function TelaLogin() {
           )}
         </TouchableOpacity>
         
+        {/* Rodapé com links secundários de navegação */}
         <View style={styles.linksContainer}>
           <Link href="/cadastro" style={styles.linkText}>Criar Conta</Link>
           <Text style={{color: '#ccc', marginHorizontal: 10}}>|</Text>
@@ -142,6 +164,10 @@ export default function TelaLogin() {
     </KeyboardAvoidingView>
   );
 }
+
+// =========================================================
+// ESTILIZAÇÃO COMPONENTE (StyleSheet Exportado)
+// =========================================================
 
 export const styles = StyleSheet.create({
   scrollContainer: {

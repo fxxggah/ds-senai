@@ -14,12 +14,23 @@ import {
 import { useRouter } from 'expo-router';
 import api from '../services/api';
 
+// =========================================================
+// TELA DE RECUPERAÇÃO DE ACESSO / SOLICITAÇÃO AO RH
+// Permite ao usuário solicitar instruções para redefinição de senha
+// =========================================================
+
 export default function TelaRecuperar() {
+  // Estados para armazenamento do e-mail e controle do indicador de carregamento
   const [email, setEmail] = useState('');
   const [carregando, setCarregando] = useState(false);
+  
   const router = useRouter();
 
+  // =========================================================
+  // FUNÇÃO: Solicitação de nova senha via API Gateway
+  // =========================================================
   const solicitarNovaSenha = async () => {
+    // Validação básica do campo de e-mail
     if (!email) {
       return Alert.alert('Erro', 'Por favor, informe seu e-mail cadastrado.');
     }
@@ -27,10 +38,12 @@ export default function TelaRecuperar() {
     setCarregando(true);
 
     try {
-      // ✅ Atualizado com o prefixo do Gateway
+      // Rota POST enviada via API Gateway: /api/auth/recuperar -> Backend:3003
       const res = await api.post('/api/auth/recuperar', { email });
 
       Alert.alert('Solicitação Enviada', res.data.message);
+      
+      // Limpa o campo e redireciona de volta para a tela inicial de Login
       setEmail('');
       router.replace('/');
     } catch (erro) {
@@ -50,11 +63,14 @@ export default function TelaRecuperar() {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
+        
+        {/* Cabeçalho da Tela */}
         <Text style={styles.titulo}>Recuperar Acesso</Text>
         <Text style={styles.subtitulo}>
           Informe seu e-mail cadastrado. Você receberá as instruções e o suporte pelo RH.
         </Text>
 
+        {/* Campo: E-mail Corporativo */}
         <TextInput
           style={styles.input}
           placeholder="Digite seu e-mail corporativo"
@@ -64,6 +80,7 @@ export default function TelaRecuperar() {
           onChangeText={setEmail}
         />
 
+        {/* Botão de Envio de Solicitação */}
         <TouchableOpacity 
           style={[styles.botao, carregando && styles.botaoDesabilitado]} 
           onPress={solicitarNovaSenha}
@@ -76,13 +93,19 @@ export default function TelaRecuperar() {
           )}
         </TouchableOpacity>
 
+        {/* Botão para retornar à tela de Login */}
         <TouchableOpacity onPress={() => router.back()} style={styles.botaoVoltar}>
           <Text style={styles.textoVoltar}>Voltar para o Login</Text>
         </TouchableOpacity>
+
       </ScrollView>
     </KeyboardAvoidingView>
   );
 }
+
+// =========================================================
+// ESTILIZAÇÃO COMPONENTE (StyleSheet)
+// =========================================================
 
 const styles = StyleSheet.create({
   container: {

@@ -13,20 +13,30 @@ import {
 import { styles } from './index'; 
 import api from '../services/api'; 
 
+// =========================================================
+// TELA DE CADASTRO DE EQUIPE / NOVOS FUNCIONÁRIOS
+// Permite registrar novos membros da loja no sistema
+// =========================================================
+
 export default function TelaCadastro() {
+  // Estados para armazenamento dos dados do formulário
   const [nome, setNome] = useState('');
   const [cargo, setCargo] = useState('');
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
 
+  // =========================================================
+  // FUNÇÃO: Envio de dados e registro via API Gateway
+  // =========================================================
   const registrarEquipe = async () => {
+    // Validação básica dos campos obrigatórios
     if (!nome || !cargo || !email || !senha) {
       Alert.alert('Erro', 'Por favor, preencha todos os dados do funcionário!');
       return;
     }
 
     try {
-      // ✅ Atualizado com o prefixo do Gateway
+      // Rota enviada via API Gateway: /api/auth/cadastro -> Backend:3003
       const resposta = await api.post('/api/auth/cadastro', {
         nome: nome,
         email: email,
@@ -36,6 +46,7 @@ export default function TelaCadastro() {
 
       Alert.alert('Sucesso!', resposta.data.message || `Membro da equipe ${nome} cadastrado.`);
 
+      // Limpa os campos do formulário após sucesso
       setNome('');
       setCargo('');
       setEmail('');
@@ -64,9 +75,11 @@ export default function TelaCadastro() {
       >
         <StatusBar barStyle="dark-content" backgroundColor="#f0f2f5" />
         
+        {/* Cabeçalho da Tela */}
         <Text style={styles.titulo}>Nova Conta</Text>
         <Text style={styles.subtitulo}>Cadastro de equipe da loja</Text>
 
+        {/* Campo: Nome Completo */}
         <TextInput
           style={styles.input}
           placeholder="Nome Completo"
@@ -74,6 +87,7 @@ export default function TelaCadastro() {
           onChangeText={setNome}
         />
 
+        {/* Campo: Cargo / Setor */}
         <TextInput
           style={styles.input}
           placeholder="Cargo (Ex: Vendedor, Caixa, Gerente)"
@@ -81,6 +95,7 @@ export default function TelaCadastro() {
           onChangeText={setCargo}
         />
 
+        {/* Campo: E-mail Corporativo */}
         <TextInput
           style={styles.input}
           placeholder="E-mail corporativo"
@@ -90,6 +105,7 @@ export default function TelaCadastro() {
           onChangeText={setEmail}
         />
 
+        {/* Campo: Senha */}
         <TextInput
           style={styles.input}
           placeholder="Crie uma senha de acesso"
@@ -98,6 +114,7 @@ export default function TelaCadastro() {
           onChangeText={setSenha}
         />
 
+        {/* Botão de Envio do Formulário */}
         <TouchableOpacity style={styles.botao} onPress={registrarEquipe}>
           <Text style={styles.botaoTexto}>CADASTRAR FUNCIONÁRIO</Text>
         </TouchableOpacity>

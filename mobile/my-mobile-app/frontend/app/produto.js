@@ -11,24 +11,32 @@ import {
   StatusBar
 } from 'react-native';
 import { styles } from './index'; 
-import api from '../services/api'; // 🔌 Importando nossa conexão com a API
+import api from '../services/api'; 
+
+// =========================================================
+// TELA DE CADASTRO DE PRODUTOS / ENTRADA DE MERCADORIA
+// Registra novos itens no inventário do estoque via API
+// =========================================================
 
 export default function TelaProduto() {
+  // Estados para armazenamento dos dados do produto
   const [nomeProduto, setNomeProduto] = useState('');
   const [categoria, setCategoria] = useState('');
   const [quantidade, setQuantidade] = useState('');
-  // Trocamos observacao por preco para alinhar com o Banco de Dados
   const [preco, setPreco] = useState(''); 
 
+  // =========================================================
+  // FUNÇÃO: Envio de dados e registro de mercadoria na API
+  // =========================================================
   const registrarEntrada = async () => {
-    // Validação básica atualizada para exigir o preço
+    // Validação dos campos obrigatórios
     if (!nomeProduto || !categoria || !quantidade || !preco) {
       Alert.alert('Erro', 'Preencha o Nome, Categoria, Quantidade e Preço do produto!');
       return;
     }
 
     try {
-      // 🔌 Enviando o POST com a propriedade "preco" exata que o backend espera
+      // Rota POST enviando as propriedades exatas para o serviço de produtos
       const resposta = await api.post('/produtos', {
         nome: nomeProduto,
         categoria: categoria,
@@ -36,13 +44,13 @@ export default function TelaProduto() {
         preco: preco 
       });
 
-      // Sucesso!
+      // Confirmação de cadastro concluído
       Alert.alert(
         'Produto Registrado!',
         resposta.data.message || `Foram adicionadas ${quantidade} unidades de ${nomeProduto} ao estoque.`
       );
 
-      // Limpa os campos após salvar
+      // Limpa os campos do formulário
       setNomeProduto('');
       setCategoria('');
       setQuantidade('');
@@ -71,6 +79,7 @@ export default function TelaProduto() {
       >
         <StatusBar barStyle="dark-content" backgroundColor="#f0f2f5" />
         
+        {/* Cabeçalho da Tela */}
         <Text style={[styles.titulo, { fontSize: 24, marginBottom: 5 }]}>
           Entrada de Mercadoria
         </Text>
@@ -78,6 +87,7 @@ export default function TelaProduto() {
           Registre os produtos recém-chegados na loja
         </Text>
 
+        {/* Campo: Nome do Produto */}
         <TextInput
           style={styles.input}
           placeholder="Nome do Produto (ex: SSD Kingston 480GB)"
@@ -85,6 +95,7 @@ export default function TelaProduto() {
           onChangeText={setNomeProduto}
         />
 
+        {/* Campo: Categoria */}
         <TextInput
           style={styles.input}
           placeholder="Categoria (ex: Hardware, Periféricos, Cabos)"
@@ -92,6 +103,7 @@ export default function TelaProduto() {
           onChangeText={setCategoria}
         />
 
+        {/* Campo: Quantidade Recebida */}
         <TextInput
           style={styles.input}
           placeholder="Quantidade Recebida (ex: 10)"
@@ -100,7 +112,7 @@ export default function TelaProduto() {
           onChangeText={setQuantidade}
         />
 
-        {/* Novo input de Preço no lugar da Observação */}
+        {/* Campo: Preço Unitário */}
         <TextInput
           style={styles.input}
           placeholder="Preço Unitário (ex: 250.00)"
@@ -109,6 +121,7 @@ export default function TelaProduto() {
           onChangeText={setPreco}
         />
 
+        {/* Botão de Envio do Formulário */}
         <TouchableOpacity style={styles.botao} onPress={registrarEntrada}>
           <Text style={styles.botaoTexto}>REGISTRAR NO ESTOQUE</Text>
         </TouchableOpacity>

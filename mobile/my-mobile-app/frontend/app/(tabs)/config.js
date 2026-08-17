@@ -4,16 +4,30 @@ import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage'; 
 import api from '../../services/api'; 
 
+// =========================================================
+// TELA DE CONFIGURAÇÕES / GERENCIAMENTO DA CONTA
+// Responsável pelas ações de Logout e Exclusão Permanente de Perfil
+// =========================================================
+
 export default function TelaConfig() {
+  // Controle do estado de exibição do Modal de Confirmação de Logout
   const [modalVisivel, setModalVisivel] = useState(false); 
   const router = useRouter();
 
+  // =========================================================
+  // FUNÇÃO: Encerramento de Sessão (Logout)
+  // Limpa o ID do usuário salvo no dispositivo e redireciona para a Login
+  // =========================================================
   const fazerLogout = async () => {
     setModalVisivel(false);
     await AsyncStorage.removeItem('usuarioId'); 
     router.replace('/');
   };
 
+  // =========================================================
+  // FUNÇÃO: Exclusão Definitiva de Conta
+  // Faz chamada à API via Gateway e remove os dados locais do storage
+  // =========================================================
   const deletarConta = async () => {
     try {
       const idSalvo = await AsyncStorage.getItem('usuarioId');
@@ -22,7 +36,7 @@ export default function TelaConfig() {
         return Alert.alert('Erro', 'Nenhum usuário logado encontrado.');
       }
 
-      // ✅ Atualizado com o prefixo do Gateway
+      // Requisição DELETE repassada via API Gateway (/api/perfil -> Backend:3003)
       await api.delete(`/api/perfil/usuarios/${idSalvo}`);
 
       Alert.alert('Sucesso', 'Sua conta foi excluída permanentemente.');
@@ -34,6 +48,7 @@ export default function TelaConfig() {
     }
   };
 
+  // Pop-up nativo de confirmação de segurança antes de deletar a conta
   const confirmarExclusao = () => {
     Alert.alert(
       'Atenção! Ação Irreversível',
@@ -49,16 +64,23 @@ export default function TelaConfig() {
     <View style={styles.container}>
       <Text style={styles.titulo}>Configurações da Conta</Text>
       
+      {/* Botão para abrir modal de Logout */}
       <TouchableOpacity style={styles.botaoSair} onPress={() => setModalVisivel(true)}>
         <Text style={styles.textoBotaoSair}>Sair do Sistema</Text>
       </TouchableOpacity>
 
       <View style={styles.linhaDivisoria} />
 
+      {/* Botão para disparar alerta de Exclusão de Conta */}
       <TouchableOpacity style={styles.botaoExcluir} onPress={confirmarExclusao}>
         <Text style={styles.textoBotaoExcluir}>Excluir Minha Conta</Text>
       </TouchableOpacity>
 
+      {/* 
+        =========================================================
+        MODAL DE CONFIRMAÇÃO DE LOGOUT
+        =========================================================
+      */}
       <Modal
         animationType="fade"
         transparent={true}
@@ -92,6 +114,10 @@ export default function TelaConfig() {
   );
 }
 
+// =========================================================
+// ESTILIZAÇÃO COMPONENTE (StyleSheet)
+// =========================================================
+
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 20, backgroundColor: '#f5f5f5', justifyContent: 'center' },
   titulo: { fontSize: 20, fontWeight: 'bold', marginBottom: 20, textAlign: 'center', color: '#333' },
@@ -104,6 +130,7 @@ const styles = StyleSheet.create({
   botaoExcluir: { backgroundColor: 'transparent', borderWidth: 2, borderColor: '#cc0000', padding: 15, borderRadius: 8, alignItems: 'center' },
   textoBotaoExcluir: { color: '#cc0000', fontSize: 16, fontWeight: 'bold' },
   
+  // Estilos do Modal de Logout
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.5)',

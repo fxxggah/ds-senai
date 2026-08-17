@@ -6,23 +6,29 @@ const multer = require('multer');
 const db = require('./db');
 
 const app = express();
+
+// Configuração do Multer para salvar imagens na memória temporária antes de persistir no banco
 const upload = multer({ storage: multer.memoryStorage() });
+
+// =========================================================
+// MIDDLEWARES GLOBAIS
+// =========================================================
 
 app.use(cors());
 app.use(express.json());
-app.use(express.static('public')); // Serve o painel do RH em HTML
+app.use(express.static('public')); // Serve arquivos estáticos da pasta public (ex: Painel Web do RH)
 
-// Middleware de Log para monitorar conexões no terminal
+// Middleware de Log: Exibe no terminal as requisições repassadas pelo Gateway ou diretas
 app.use((req, res, next) => {
   console.log(`[BACKEND 3003] Requisição recebida: ${req.method} ${req.url}`);
   next();
 });
 
-// ==========================================
-// --- ROTAS DE RECUPERAÇÃO DE SENHA E RH ---
-// ==========================================
+// =========================================================
+// ROTAS DE RECUPERAÇÃO DE SENHA E PAINEL RH
+// =========================================================
 
-// 🚀 POST /recuperar (App Mobile pede ajuda ao RH)
+// Registra pedido de recuperação de senha enviado pelo app mobile
 app.post('/recuperar', async (req, res) => {
   const { email } = req.body;
 
@@ -42,7 +48,7 @@ app.post('/recuperar', async (req, res) => {
   }
 });
 
-// 🚀 GET /rh/solicitacoes (Listar chamados pendentes para a tela do RH no navegador)
+// Busca todas as solicitações pendentes para o painel de administração do RH (Web)
 app.get('/rh/solicitacoes', async (req, res) => {
   try {
     const [solicitacoes] = await db.query(
@@ -55,7 +61,7 @@ app.get('/rh/solicitacoes', async (req, res) => {
   }
 });
 
-// 🚀 PUT /rh/resetar-senha (RH redefine a senha do usuário)
+// Reseta a senha do usuário no banco para o valor padrão 'senai123' e marca o chamado como resolvido
 app.put('/rh/resetar-senha', async (req, res) => {
   const { email, idSolicitacao } = req.body;
   const SENHA_PADRAO = 'senai123';
@@ -72,10 +78,11 @@ app.put('/rh/resetar-senha', async (req, res) => {
   }
 });
 
-// ==========================================
-// --- ROTAS DE AUTENTICAÇÃO E PERFIL ---
-// ==========================================
+// =========================================================
+// ROTAS DE AUTENTICAÇÃO E GESTÃO DE USUÁRIOS
+// =========================================================
 
+// Criação de novos usuários/funcionários
 app.post('/cadastro', async (req, res) => {
   const { nome, email, senha, setor } = req.body;
 
@@ -99,6 +106,7 @@ app.post('/cadastro', async (req, res) => {
   }
 });
 
+// Autenticação de usuários no app mobile
 app.post('/login', async (req, res) => {
   console.log('[AUTH] Dados recebidos para login:', req.body);
   const { email, senha } = req.body;
@@ -134,6 +142,7 @@ app.post('/login', async (req, res) => {
   }
 });
 
+// Busca dados detalhados do perfil e converte a imagem (BLOB) para Base64 para exibição no Expo
 app.get('/usuarios/:id', async (req, res) => {
   const { id } = req.params;
 
@@ -157,6 +166,7 @@ app.get('/usuarios/:id', async (req, res) => {
   }
 });
 
+// Upload e atualização da foto de perfil (crachá)
 app.patch('/usuarios/:id/foto', upload.single('foto'), async (req, res) => {
   try {
       const fotoBuffer = req.file ? req.file.buffer : null;
@@ -173,6 +183,7 @@ app.patch('/usuarios/:id/foto', upload.single('foto'), async (req, res) => {
   }
 });
 
+// Exclusão definitiva de conta de usuário
 app.delete('/usuarios/:id', async (req, res) => {
   try {
       await db.query('DELETE FROM usuarios WHERE id = ?', [req.params.id]);
@@ -183,6 +194,7 @@ app.delete('/usuarios/:id', async (req, res) => {
   }
 });
 
+// Atualização dos dados de trabalho (setor e turno) do operador
 app.put('/usuarios/:id', async (req, res) => {
   const { setor, turno } = req.body;
   
@@ -198,10 +210,11 @@ app.put('/usuarios/:id', async (req, res) => {
   }
 });
 
-// ==========================================
-// --- ROTAS DE PRODUTOS E SUPORTE ---
-// ==========================================
+// =========================================================
+// ROTAS DE PRODUTOS E SUPORTE
+// =========================================================
 
+// Listagem de produtos no estoque
 app.get('/produtos', async (req, res) => {
   try {
     const [produtos] = await db.query('SELECT * FROM produtos');
@@ -212,6 +225,7 @@ app.get('/produtos', async (req, res) => {
   }
 });
 
+// Cadastro de novo produto no estoque
 app.post('/produtos', async (req, res) => {
   const { nome, categoria, quantidade, preco } = req.body;
 
@@ -238,6 +252,7 @@ app.post('/produtos', async (req, res) => {
   }
 });
 
+// Remoção de produto por ID
 app.delete('/produtos/:id', async (req, res) => {
   const { id } = req.params;
 
@@ -255,6 +270,7 @@ app.delete('/produtos/:id', async (req, res) => {
   }
 });
 
+// Abertura de chamados de suporte técnico
 app.post('/suporte', async (req, res) => {
   const { operador, setor, descricao } = req.body;
   
@@ -272,6 +288,10 @@ app.post('/suporte', async (req, res) => {
     res.status(500).json({ error: "Erro ao registrar o chamado." });
   }
 });
+
+// =========================================================
+// INICIALIZAÇÃO DO SERVIDOR
+// =========================================================
 
 const PORT = process.env.PORT || 3003;
 app.listen(PORT, () => {
