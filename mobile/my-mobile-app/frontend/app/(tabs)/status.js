@@ -10,7 +10,6 @@ export default function TelaStatus() {
   const [carregandoFoto, setCarregandoFoto] = useState(false);
   const [salvando, setSalvando] = useState(false);
 
-  // 🚀 Novos estados para edição
   const [novoSetor, setNovoSetor] = useState('');
   const [novoTurno, setNovoTurno] = useState('');
 
@@ -30,7 +29,6 @@ export default function TelaStatus() {
       const resposta = await api.get(`/usuarios/${idSalvo}`);
       setUsuario(resposta.data);
       
-      // Preenche os inputs com os dados atuais do banco
       setNovoSetor(resposta.data.setor || '');
       setNovoTurno(resposta.data.turno || '');
 
@@ -42,42 +40,10 @@ export default function TelaStatus() {
     }
   };
 
-  // 🚀 Nova função para salvar as alterações (PUT)
-  const salvarAlteracoes = async () => {
-    setSalvando(true);
-    try {
-      const idSalvo = await AsyncStorage.getItem('usuarioId');
-      
-      // Bate na sua rota PUT /usuarios/:id
-      await api.put(`/usuarios/${idSalvo}`, {
-        setor: novoSetor,
-        turno: novoTurno
-      });
-
-      Alert.alert('Sucesso', 'Perfil atualizado com sucesso!');
-      carregarPerfil(); // Recarrega os dados na tela
-    } catch (error) {
-      console.error(error);
-      Alert.alert('Erro', 'Falha ao atualizar os dados.');
-    } finally {
-      setSalvando(false);
-    }
-  };
-
-  const escolherEEnviarFoto = async () => {
-    let resultado = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ['images'], 
-      allowsEditing: true,
-      aspect: [1, 1],
-      quality: 0.5,
-    });
-
-    if (resultado.canceled) return;
-
+  // 📸 Função auxiliar para processar e enviar a foto (seja da câmera ou da galeria)
+  const enviarFotoParaServidor = async (imagemSelecionada) => {
     setCarregandoFoto(true);
-
     try {
-      const imagemSelecionada = resultado.assets[0];
       const formData = new FormData();
       
       formData.append('foto', {
@@ -102,6 +68,76 @@ export default function TelaStatus() {
     }
   };
 
+  // 📷 Option 1: Tirar Foto usando a Câmera Física
+  const tirarFotoComCamera = async () => {
+    // 1. Pede permissão para acessar a câmera
+    const permissao = await ImagePicker.requestCameraPermissionsAsync();
+
+    if (!permissao.granted) {
+      Alert.alert('Permissão Negada', 'Você precisa permitir o acesso à câmera para tirar fotos do crachá.');
+      return;
+    }
+
+    // 2. Abre a Câmera
+    let resultado = await ImagePicker.launchCameraAsync({
+      mediaTypes: ['images'],
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.5,
+    });
+
+    if (!resultado.canceled) {
+      enviarFotoParaServidor(resultado.assets[0]);
+    }
+  };
+
+  // 🖼️ Option 2: Escolher foto existente da Galeria
+  const escolherDaGaleria = async () => {
+    let resultado = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'],
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.5,
+    });
+
+    if (!resultado.canceled) {
+      enviarFotoParaServidor(resultado.assets[0]);
+    }
+  };
+
+  // 🚀 Menu seletor disparado ao clicar no botão da Foto
+  const menuOpcoesFoto = () => {
+    Alert.alert(
+      'Atualizar Foto do Crachá',
+      'Como deseja enviar sua foto?',
+      [
+        { text: '📷 Tirar Foto Agora', onPress: tirarFotoComCamera },
+        { text: '🖼️ Escolher da Galeria', onPress: escolherDaGaleria },
+        { text: 'Cancelar', style: 'cancel' },
+      ]
+    );
+  };
+
+  const salvarAlteracoes = async () => {
+    setSalvando(true);
+    try {
+      const idSalvo = await AsyncStorage.getItem('usuarioId');
+      
+      await api.put(`/usuarios/${idSalvo}`, {
+        setor: novoSetor,
+        turno: novoTurno
+      });
+
+      Alert.alert('Sucesso', 'Perfil atualizado com sucesso!');
+      carregarPerfil(); 
+    } catch (error) {
+      console.error(error);
+      Alert.alert('Erro', 'Falha ao atualizar os dados.');
+    } finally {
+      setSalvando(false);
+    }
+  };
+
   const imagemExibicao = usuario?.foto 
     ? { uri: `data:image/jpeg;base64,${usuario.foto}` }
     : { uri: 'https://cdn-icons-png.flaticon.com/512/149/149071.png' };
@@ -118,16 +154,16 @@ export default function TelaStatus() {
           <Image source={imagemExibicao} style={styles.foto} />
           <TouchableOpacity 
             style={styles.botaoFoto} 
-            onPress={escolherEEnviarFoto} 
+            onPress={menuOpcoesFoto} 
             disabled={carregandoFoto}
           >
             <Text style={styles.botaoFotoTexto}>
-              {carregandoFoto ? 'Enviando...' : 'Trocar Foto'}
+              {carregandoFoto ? 'Enviando...' : 'Alterar Foto'}
             </Text>
           </TouchableOpacity>
         </View>
 
-        {/* Informações Fijas */}
+        {/* Informações */}
         {carregando ? (
           <ActivityIndicator size="large" color="#003366" style={{ marginTop: 20 }} />
         ) : (
@@ -138,7 +174,6 @@ export default function TelaStatus() {
             <Text style={styles.label}>E-mail:</Text>
             <Text style={styles.valorFixo}>{usuario?.email || 'Não informado'}</Text>
 
-            {/* 🚀 Campos Editáveis */}
             <View style={styles.linhaDivisoria} />
             <Text style={styles.tituloEdicao}>Informações de Trabalho</Text>
 
