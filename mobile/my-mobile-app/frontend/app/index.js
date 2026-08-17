@@ -15,7 +15,7 @@ import {
 import * as Haptics from 'expo-haptics';
 import { Link, useRouter } from 'expo-router'; 
 import { useNetInfo } from '@react-native-community/netinfo';
-import AsyncStorage from '@react-native-async-storage/async-storage'; // 💾 1. Importação do AsyncStorage
+import AsyncStorage from '@react-native-async-storage/async-storage'; 
 import api from '../services/api'; 
 
 export default function TelaLogin() {
@@ -44,7 +44,6 @@ export default function TelaLogin() {
 
       const usuario = resposta.data.usuario;
 
-      // 💾 2. Salva o ID dinâmico do usuário na memória do aparelho
       if (usuario?.id) {
         await AsyncStorage.setItem('usuarioId', String(usuario.id));
       }
@@ -106,6 +105,14 @@ export default function TelaLogin() {
           value={senha}
           onChangeText={setSenha}
         />
+
+        {/* Link direto para a tela de recuperação */}
+        <TouchableOpacity 
+          style={styles.containerEsqueceuSenha}
+          onPress={() => router.push('/recuperar')}
+        >
+          <Text style={styles.linkEsqueceuSenha}>Esqueceu a senha?</Text>
+        </TouchableOpacity>
         
         <TouchableOpacity 
           style={[
@@ -181,7 +188,7 @@ export const styles = StyleSheet.create({
     borderColor: '#E2E8F0', 
     borderRadius: 12, 
     padding: 16, 
-    marginBottom: 16,
+    marginBottom: 12,
     fontSize: 16,
     color: '#334155', 
     shadowColor: '#000',
@@ -190,12 +197,21 @@ export const styles = StyleSheet.create({
     shadowRadius: 2,
     elevation: 1, 
   },
+  containerEsqueceuSenha: {
+    alignSelf: 'flex-end',
+    marginBottom: 16,
+  },
+  linkEsqueceuSenha: {
+    color: '#4F46E5',
+    fontWeight: '600',
+    fontSize: 14,
+  },
   botao: {
     backgroundColor: '#4F46E5', 
     padding: 18, 
     borderRadius: 12,
     alignItems: 'center',
-    marginTop: 12,
+    marginTop: 4,
     shadowColor: '#4F46E5',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.25,

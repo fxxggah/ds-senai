@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Painel do RH - InfoEstoque</title>
+  <style>
+    body { font-family: Arial, sans-serif; background-color: #f0f2f5; margin: 0; padding: 20px; }
+    .container { max-width: 800px; margin: 0 auto; background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+    h1 { color: #4F46E5; border-bottom: 2px solid #4F46E5; padding-bottom: 10px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+    th { background-color: #4F46E5; color: white; }
+    .btn-reset { background-color: #28a745; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; }
+    .btn-reset:hover { background-color: #218838; }
+    .empty-msg { margin-top: 20px; color: #666; font-style: italic; }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h1>🏭 Painel do RH - Redefinição de Senhas</h1>
+    <p>Abaixo estão os operadores do InfoEstoque que solicitaram redefinição pelo app móvel:</p>
+
+    <table id="tabela-solicitacoes">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>E-mail do Operador</th>
+          <th>Data do Pedido</th>
+          <th>Ação do RH</th>
+        </tr>
+      </thead>
+      <tbody id="corpo-tabela"></tbody>
+    </table>
+
+    <div id="mensagem-vazia" class="empty-msg" style="display: none;">
+      Nenhuma solicitação pendente no momento.
+    </div>
+  </div>
+
+  <script>
+    async function carregarSolicitacoes() {
+      const res = await fetch('http://localhost:3003/rh/solicitacoes');
+      const dados = await res.json();
+      const tabela = document.getElementById('corpo-tabela');
+      const msgVazia = document.getElementById('mensagem-vazia');
+
+      tabela.innerHTML = '';
+
+      if (dados.length === 0) {
+        msgVazia.style.display = 'block';
+        return;
+      }
+
+      msgVazia.style.display = 'none';
+
+      dados.forEach(item => {
+        const linha = document.createElement('tr');
+        const dataFormatada = new Date(item.data_solicitacao).toLocaleString('pt-BR');
+
+        linha.innerHTML = `
+          <td>${item.id}</td>
+          <td>${item.email}</td>
+          <td>${dataFormatada}</td>
+          <td>
+            <button class="btn-reset" onclick="resetarSenha('${item.email}', ${item.id})">
+              Resetar para 'senai123'
+            </button>
+          </td>
+        `;
+        tabela.appendChild(linha);
+      });
+    }
+
+    async function resetarSenha(email, idSolicitacao) {
+      if (!confirm(`Deseja redefinir a senha do operador ${email} para 'senai123'?`)) return;
+
+      const res = await fetch('http://localhost:3003/rh/resetar-senha', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, idSolicitacao })
+      });
+
+      const resultado = await res.json();
+      alert(resultado.message);
+      carregarSolicitacoes();
+    }
+
+    carregarSolicitacoes();
+  </script>
+</body>
+</html>

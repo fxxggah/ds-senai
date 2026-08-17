@@ -2,22 +2,74 @@ require('dotenv').config();
 
 const express = require('express');
 const cors = require('cors');
-const multer = require('multer'); // Importando o Multer
-const db = require('./db'); // Conexão com o MySQL
+const multer = require('multer');
+const db = require('./db');
 
 const app = express();
-
-// Configuração do Multer para guardar a foto na memória RAM
 const upload = multer({ storage: multer.memoryStorage() });
 
 app.use(cors());
 app.use(express.json());
+app.use(express.static('public')); // Serve o painel do RH em HTML
+
+// ==========================================
+// --- ROTAS DE RECUPERAÇÃO DE SENHA E RH ---
+// ==========================================
+
+// 🚀 POST /recuperar (App Mobile pede ajuda ao RH)
+app.post('/recuperar', async (req, res) => {
+  const { email } = req.body;
+
+  try {
+    const [user] = await db.query('SELECT * FROM usuarios WHERE email = ?', [email]);
+    if (user.length === 0) {
+      return res.status(404).json({ error: 'E-mail corporativo não encontrado.' });
+    }
+
+    await db.query('INSERT INTO solicitacoes_senha (email) VALUES (?)', [email]);
+    
+    console.log(`[RH] Solicitação de senha registrada para: ${email}`);
+    res.status(200).json({ message: 'Solicitação enviada ao RH com sucesso!' });
+  } catch (erro) {
+    console.error(erro);
+    res.status(500).json({ error: 'Erro ao registrar solicitação.' });
+  }
+});
+
+// 🚀 GET /rh/solicitacoes (Listar chamados pendentes para a tela do RH no navegador)
+app.get('/rh/solicitacoes', async (req, res) => {
+  try {
+    const [solicitacoes] = await db.query(
+      "SELECT * FROM solicitacoes_senha WHERE status = 'PENDENTE' ORDER BY data_solicitacao DESC"
+    );
+    res.status(200).json(solicitacoes);
+  } catch (erro) {
+    console.error(erro);
+    res.status(500).json({ error: 'Erro ao buscar solicitações.' });
+  }
+});
+
+// 🚀 PUT /rh/resetar-senha (RH redefine a senha do usuário)
+app.put('/rh/resetar-senha', async (req, res) => {
+  const { email, idSolicitacao } = req.body;
+  const SENHA_PADRAO = 'senai123';
+
+  try {
+    await db.query('UPDATE usuarios SET senha = ? WHERE email = ?', [SENHA_PADRAO, email]);
+    await db.query("UPDATE solicitacoes_senha SET status = 'RESOLVIDO' WHERE id = ?", [idSolicitacao]);
+
+    console.log(`[RH] Senha do e-mail ${email} resetada para '${SENHA_PADRAO}'`);
+    res.status(200).json({ message: `Senha redefinida com sucesso para: ${SENHA_PADRAO}` });
+  } catch (erro) {
+    console.error(erro);
+    res.status(500).json({ error: 'Erro ao redefinir senha.' });
+  }
+});
 
 // ==========================================
 // --- ROTAS DE AUTENTICAÇÃO E PERFIL ---
 // ==========================================
 
-// 1. Rota POST: Cadastrar novo funcionário
 app.post('/cadastro', async (req, res) => {
   const { nome, email, senha, setor } = req.body;
 
@@ -41,7 +93,6 @@ app.post('/cadastro', async (req, res) => {
   }
 });
 
-// 2. Rota POST: Fazer Login
 app.post('/login', async (req, res) => {
   const { email, senha } = req.body;
 
@@ -75,7 +126,6 @@ app.post('/login', async (req, res) => {
   }
 });
 
-// 3. Rota GET: Buscar perfil do usuário por ID (Atualizado para buscar a foto)
 app.get('/usuarios/:id', async (req, res) => {
   const { id } = req.params;
 
@@ -99,7 +149,6 @@ app.get('/usuarios/:id', async (req, res) => {
   }
 });
 
-// 4. Rota PATCH: Atualizar APENAS a foto (NOVO)
 app.patch('/usuarios/:id/foto', upload.single('foto'), async (req, res) => {
   try {
       const fotoBuffer = req.file ? req.file.buffer : null;
@@ -116,7 +165,6 @@ app.patch('/usuarios/:id/foto', upload.single('foto'), async (req, res) => {
   }
 });
 
-// 5. Rota DELETE: Excluir Perfil do Usuário (NOVO)
 app.delete('/usuarios/:id', async (req, res) => {
   try {
       await db.query('DELETE FROM usuarios WHERE id = ?', [req.params.id]);
@@ -127,7 +175,6 @@ app.delete('/usuarios/:id', async (req, res) => {
   }
 });
 
-// 6. Rota PUT: Atualizar Setor e Turno
 app.put('/usuarios/:id', async (req, res) => {
   const { setor, turno } = req.body;
   
@@ -143,16 +190,13 @@ app.put('/usuarios/:id', async (req, res) => {
   }
 });
 
-
 // ==========================================
 // --- ROTAS DE PRODUTOS E SUPORTE ---
 // ==========================================
 
-// Rota GET: Buscar produtos do MySQL
 app.get('/produtos', async (req, res) => {
   try {
     const [produtos] = await db.query('SELECT * FROM produtos');
-    console.log('[INFOESTOQUE] Produtos buscados no banco.');
     res.status(200).json(produtos);
   } catch (erro) {
     console.error(erro);
@@ -160,7 +204,6 @@ app.get('/produtos', async (req, res) => {
   }
 });
 
-// Rota POST: Gravar produto real no MySQL
 app.post('/produtos', async (req, res) => {
   const { nome, categoria, quantidade, preco } = req.body;
 
@@ -177,8 +220,6 @@ app.post('/produtos', async (req, res) => {
       Number(preco) || 0.00
     ]);
 
-    console.log(`[INFOESTOQUE] Produto cadastrado com ID: ${resultado.insertId}`);
-
     res.status(201).json({
       message: "Produto cadastrado com sucesso no banco!",
       id: resultado.insertId
@@ -189,7 +230,6 @@ app.post('/produtos', async (req, res) => {
   }
 });
 
-// Rota DELETE: Remover produto por ID no MySQL
 app.delete('/produtos/:id', async (req, res) => {
   const { id } = req.params;
 
@@ -200,7 +240,6 @@ app.delete('/produtos/:id', async (req, res) => {
       return res.status(404).json({ error: "Produto não encontrado." });
     }
 
-    console.log(`[INFOESTOQUE] Produto ID ${id} removido.`);
     res.status(200).json({ message: "Produto removido com sucesso!" });
   } catch (erro) {
     console.error(erro);
@@ -220,15 +259,12 @@ app.post('/suporte', async (req, res) => {
       'INSERT INTO chamados (operador, setor, descricao) VALUES (?, ?, ?)', 
       [operador, setor, descricao]
     );
-    console.log("Chamada enviada com sucesso!");
     res.status(201).json({ message: "Chamado registrado." });
   } catch (erro) {
     res.status(500).json({ error: "Erro ao registrar o chamado." });
   }
 });
 
-
-// Iniciando o servidor na porta 3003
 const PORT = process.env.PORT || 3003;
 app.listen(PORT, () => {
   console.log(`Servidor InfoEstoque rodando na porta ${PORT} 🚀`);
