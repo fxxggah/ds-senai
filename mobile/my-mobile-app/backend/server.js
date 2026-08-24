@@ -7,7 +7,7 @@ const db = require('./db');
 
 const app = express();
 
-// Configuração do Multer para salvar imagens na memória temporária antes de persistir no banco
+// Guarda uploads temporariamente na memória RAM antes do banco
 const upload = multer({ storage: multer.memoryStorage() });
 
 // =========================================================
@@ -16,9 +16,9 @@ const upload = multer({ storage: multer.memoryStorage() });
 
 app.use(cors());
 app.use(express.json());
-app.use(express.static('public')); // Serve arquivos estáticos da pasta public (ex: Painel Web do RH)
+app.use(express.static('public')); // Servidor de arquivos estáticos (Painel RH)
 
-// Middleware de Log: Exibe no terminal as requisições repassadas pelo Gateway ou diretas
+// Log de requisições no console
 app.use((req, res, next) => {
   console.log(`[BACKEND 3003] Requisição recebida: ${req.method} ${req.url}`);
   next();
@@ -28,18 +28,16 @@ app.use((req, res, next) => {
 // ROTAS DE RECUPERAÇÃO DE SENHA E PAINEL RH
 // =========================================================
 
-// Registra no banco uma nova solicitação de redefinição de senha feita pelo app móvel
+// Cria nova solicitação de redefinição de senha para o e-mail informado
 app.post('/recuperar', async (req, res) => {
   const { email } = req.body;
 
   try {
-    // Verifica se o e-mail corporativo fornecido existe no sistema
     const [user] = await db.query('SELECT * FROM usuarios WHERE email = ?', [email]);
     if (user.length === 0) {
       return res.status(404).json({ error: 'E-mail corporativo não encontrado.' });
     }
 
-    // Cria a solicitação com status padrão pendente
     await db.query('INSERT INTO solicitacoes_senha (email) VALUES (?)', [email]);
     
     console.log(`[RH] Solicitação de senha registrada para: ${email}`);
@@ -50,7 +48,7 @@ app.post('/recuperar', async (req, res) => {
   }
 });
 
-// Retorna todas as solicitações de senha não resolvidas para exibição na tabela do Painel Web do RH
+// Retorna todas as solicitações de senha pendentes para o Painel do RH
 app.get('/rh/solicitacoes', async (req, res) => {
   try {
     const [solicitacoes] = await db.query(
@@ -63,13 +61,12 @@ app.get('/rh/solicitacoes', async (req, res) => {
   }
 });
 
-// Reseta a senha do usuário para o padrão 'senai123' e encerra o chamado no painel do RH
+// Reseta a senha para o padrão e encerra o chamado no RH
 app.put('/rh/resetar-senha', async (req, res) => {
   const { email, idSolicitacao } = req.body;
   const SENHA_PADRAO = 'senai123';
 
   try {
-    // Atualiza a credencial do usuário e o status do pedido
     await db.query('UPDATE usuarios SET senha = ? WHERE email = ?', [SENHA_PADRAO, email]);
     await db.query("UPDATE solicitacoes_senha SET status = 'RESOLVIDO' WHERE id = ?", [idSolicitacao]);
 
@@ -85,11 +82,10 @@ app.put('/rh/resetar-senha', async (req, res) => {
 // ROTAS DE AUTENTICAÇÃO E GESTÃO DE USUÁRIOS
 // =========================================================
 
-// Insere um novo operador/funcionário no banco de dados
+// Cadastra um novo funcionário no banco
 app.post('/cadastro', async (req, res) => {
   const { nome, email, senha, setor } = req.body;
 
-  // Validação dos campos essenciais do formulário
   if (!nome || !email || !senha) {
     return res.status(400).json({ error: "Nome, e-mail e senha são obrigatórios!" });
   }
@@ -103,7 +99,6 @@ app.post('/cadastro', async (req, res) => {
 
   } catch (erro) {
     console.error(erro);
-    // Trata tentativa de duplicar e-mail já existente (restrição UNIQUE no MySQL)
     if (erro.code === 'ER_DUP_ENTRY') {
       return res.status(400).json({ error: "Este e-mail já está cadastrado no sistema." });
     }
@@ -111,7 +106,7 @@ app.post('/cadastro', async (req, res) => {
   }
 });
 
-// Autentica as credenciais de acesso para liberar a entrada no app móvel
+// Valida credenciais e retorna os dados do usuário para o App
 app.post('/login', async (req, res) => {
   console.log('[AUTH] Dados recebidos para login:', req.body);
   const { email, senha } = req.body;
@@ -128,7 +123,6 @@ app.post('/login', async (req, res) => {
       const usuarioEncontrado = linhas[0];
       console.log(`[AUTH] Login aprovado para: ${usuarioEncontrado.email}`);
       
-      // Retorna os dados básicos do operador para gravação em sessão no app
       res.status(200).json({
         message: "Login aprovado",
         usuario: {
@@ -148,7 +142,7 @@ app.post('/login', async (req, res) => {
   }
 });
 
-// Consulta o perfil do usuário pelo ID e converte a foto em formato BLOB para Base64
+// Busca dados do usuário e converte a foto BLOB em Base64 para exibição
 app.get('/usuarios/:id', async (req, res) => {
   const { id } = req.params;
 
@@ -161,7 +155,6 @@ app.get('/usuarios/:id', async (req, res) => {
     }
 
     const usuario = linhas[0];
-    // Formata o arquivo binário da imagem para exibição direta no componente do React Native
     if (usuario.foto) {
       usuario.foto = usuario.foto.toString('base64');
     }
@@ -173,7 +166,7 @@ app.get('/usuarios/:id', async (req, res) => {
   }
 });
 
-// Recebe um arquivo de foto enviado no formulário e grava o buffer no banco de dados
+// Atualiza a foto do perfil enviada via multipart/form-data
 app.patch('/usuarios/:id/foto', upload.single('foto'), async (req, res) => {
   try {
       const fotoBuffer = req.file ? req.file.buffer : null;
@@ -190,7 +183,7 @@ app.patch('/usuarios/:id/foto', upload.single('foto'), async (req, res) => {
   }
 });
 
-// Remove o registro do usuário do banco de dados pelo seu ID
+// Exclui a conta do usuário
 app.delete('/usuarios/:id', async (req, res) => {
   try {
       await db.query('DELETE FROM usuarios WHERE id = ?', [req.params.id]);
@@ -201,7 +194,7 @@ app.delete('/usuarios/:id', async (req, res) => {
   }
 });
 
-// Atualiza informações profissionais do operador (setor e turno de trabalho)
+// Atualiza setor e turno do funcionário
 app.put('/usuarios/:id', async (req, res) => {
   const { setor, turno } = req.body;
   
@@ -221,7 +214,7 @@ app.put('/usuarios/:id', async (req, res) => {
 // ROTAS DE PRODUTOS E SUPORTE
 // =========================================================
 
-// Retorna a lista de itens armazenados no estoque
+// Lista todos os produtos cadastrados
 app.get('/produtos', async (req, res) => {
   try {
     const [produtos] = await db.query('SELECT * FROM produtos');
@@ -232,7 +225,7 @@ app.get('/produtos', async (req, res) => {
   }
 });
 
-// Registra um novo produto na tabela do inventário
+// Cadastra um novo produto no inventário
 app.post('/produtos', async (req, res) => {
   const { nome, categoria, quantidade, preco } = req.body;
 
@@ -259,7 +252,7 @@ app.post('/produtos', async (req, res) => {
   }
 });
 
-// Exclui um produto do inventário pelo seu ID
+// Remove um produto do inventário pelo ID
 app.delete('/produtos/:id', async (req, res) => {
   const { id } = req.params;
 
@@ -277,7 +270,7 @@ app.delete('/produtos/:id', async (req, res) => {
   }
 });
 
-// Salva solicitações de suporte ou relatórios de incidentes enviados pelo aplicativo
+// Registra um chamado de suporte enviado pelo App
 app.post('/suporte', async (req, res) => {
   const { operador, setor, descricao } = req.body;
   
@@ -297,18 +290,16 @@ app.post('/suporte', async (req, res) => {
 });
 
 // =========================================================
-// ROTAS DE NOTIFICAÇÕES RH (AULA 9)
+// ROTAS DE NOTIFICAÇÕES RH
 // =========================================================
 
-// Registra um comunicado do RH direcionado ao e-mail de um usuário específico
+// Cria um comunicado do RH para um usuário específico
 app.post('/rh/enviar-notificacao', async (req, res) => {
   const { email, titulo, mensagem } = req.body;
   try {
-    // Confirma se o e-mail informado pertence a um usuário válido
     const [user] = await db.query('SELECT id FROM usuarios WHERE email = ?', [email]);
     if (user.length === 0) return res.status(404).json({ error: 'Usuario não encontrado.' });
     
-    // Cadastra o aviso com o status inicial 'PENDENTE'
     await db.query(
       'INSERT INTO notificacoes_rh (email_usuario, titulo, mensagem) VALUES (?, ?, ?)',
       [email, titulo, mensagem]
@@ -319,11 +310,10 @@ app.post('/rh/enviar-notificacao', async (req, res) => {
   }
 });
 
-// Verifica se há mensagens pendentes para o operador e atualiza para 'LIDO' logo após a entrega
+// Polling do App: Retorna avisos pendentes e os marca como LIDO imediatamente
 app.get('/notificacoes/checar/:email', async (req, res) => {
   const { email } = req.params;
   try {
-    // Busca o comunicado pendente mais recente do usuário
     const [notificacoes] = await db.query(
       "SELECT * FROM notificacoes_rh WHERE email_usuario = ? AND status = 'PENDENTE' ORDER BY id DESC LIMIT 1",
       [email]
@@ -331,7 +321,6 @@ app.get('/notificacoes/checar/:email', async (req, res) => {
 
     if (notificacoes.length > 0) {
       const aviso = notificacoes[0];
-      // Marca o comunicado como lido para não disparar novamente a mesma notificação
       await db.query("UPDATE notificacoes_rh SET status = 'LIDO' WHERE id = ?", [aviso.id]);
       return res.json({ temNotificacao: true, titulo: aviso.titulo, mensagem: aviso.mensagem });
     }
@@ -339,6 +328,35 @@ app.get('/notificacoes/checar/:email', async (req, res) => {
     res.json({ temNotificacao: false });
   } catch (erro) {
     res.status(500).json({ error: 'Erro ao buscar notificações.' });
+  }
+});
+
+// =========================================================
+// ROTAS DE LOCALIZAÇÃO E PONTO
+// =========================================================
+
+// Registra entrada ou saída georreferenciada do usuário
+app.post('/perfil/:id/checkin', async (req, res) => {
+  const { id } = req.params;
+  const { latitude, longitude, tipo } = req.body;
+
+  const tipoRegistro = tipo === 'SAIDA' ? 'SAIDA' : 'ENTRADA';
+
+  if (!latitude || !longitude) {
+    return res.status(400).json({ error: 'Coordenadas GPS não informadas.' });
+  }
+
+  try {
+    await db.query(
+      'INSERT INTO checkins_usuario (usuario_id, latitude, longitude, tipo) VALUES (?, ?, ?, ?)',
+      [id, latitude, longitude, tipoRegistro]
+    );
+
+    console.log(`[PERFIL] ${tipoRegistro} registrada para o Usuario ID ${id}`);
+    res.status(201).json({ message: `${tipoRegistro} registrada com sucesso no posto!` });
+  } catch (erro) {
+    console.error(erro);
+    res.status(500).json({ error: 'Erro ao registrar ponto no banco de dados.' });
   }
 });
 

@@ -8,8 +8,8 @@ import { FontAwesome } from '@expo/vector-icons';
 
 export default function LayoutAbas() {
   return (
-    <Tabs 
-      screenOptions={{ 
+    <Tabs
+      screenOptions={{
         // Estilização global da Tab Bar e dos Cabeçalhos
         tabBarActiveTintColor: '#003366',   // Cor dos ícones e textos ativos
         tabBarInactiveTintColor: '#cccccc', // Cor dos ícones e textos inativos
@@ -23,27 +23,37 @@ export default function LayoutAbas() {
         Mapeia o arquivo: app/(tabs)/home.js
         =========================================================
       */}
-      <Tabs.Screen 
-        name="home" 
+      <Tabs.Screen
+        name="home"
         options={{
           title: 'Início',
           tabBarIcon: ({ color }) => <FontAwesome name="home" size={24} color={color} />,
-        }} 
+        }}
       />
-      
+
       {/* 
         =========================================================
         ABA 2: STATUS / PERFIL DO OPERADOR
         Mapeia o arquivo: app/(tabs)/status.js
         =========================================================
       */}
-      <Tabs.Screen 
-        name="status" 
+      <Tabs.Screen
+        name="status"
         options={{
           title: 'Meu Status',
           tabBarIcon: ({ color }) => <FontAwesome name="user-circle" size={24} color={color} />,
-        }} 
+        }}
       />
+
+      {/* NOVA ABA: MAPA E LOCALIZAÇÃO */}
+      <Tabs.Screen
+        name="localizacao"
+        options={{
+          title: 'Posto de Trabalho',
+          tabBarIcon: ({ color, size }) => <Ionicons name="location" color={color} size={size} />
+        }}
+      />
+
 
       {/* 
         =========================================================
@@ -51,12 +61,12 @@ export default function LayoutAbas() {
         Mapeia o arquivo: app/(tabs)/config.js
         =========================================================
       */}
-      <Tabs.Screen 
-        name="config" 
+      <Tabs.Screen
+        name="config"
         options={{
           title: 'Ajustes',
           tabBarIcon: ({ color }) => <FontAwesome name="cog" size={24} color={color} />,
-        }} 
+        }}
       />
     </Tabs>
   );

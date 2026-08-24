@@ -5,6 +5,7 @@
   <meta charset="UTF-8">
   <title>Painel do RH - InfoEstoque</title>
 
+  <!-- Estilização CSS da interface do painel web -->
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -117,6 +118,7 @@
     <h1>🏭 Painel do RH - Redefinição de Senhas</h1>
     <p>Abaixo estão os usuarios do InfoEstoque que solicitaram redefinição pelo app móvel:</p>
 
+    <!-- Tabela para exibição dos chamados de senha pendentes -->
     <table id="tabela-solicitacoes">
       <thead>
         <tr>
@@ -129,6 +131,7 @@
       <tbody id="corpo-tabela"></tbody>
     </table>
 
+    <!-- Feedback visual exibido quando não há chamados pendentes -->
     <div id="mensagem-vazia" class="empty-msg" style="display: none;">
       Nenhuma solicitação pendente no momento.
     </div>
@@ -137,6 +140,7 @@
     <h2>2. Enviar Notificação Direcionada ao App</h2>
     <p>Envie um comunicado interno para ser exibido como notificação nativa no celular do operador:</p>
 
+    <!-- Formulário de envio de notificações internas -->
     <div class="card-form">
       <div class="form-group">
         <label for="notif-email">E-mail do Usuario:</label>
@@ -158,8 +162,10 @@
   </div>
 
   <script>
+  // Endereço base da API backend do sistema
   const API_URL = 'http://localhost:3003';
 
+  // Busca as solicitações de senha pendentes no backend e monta as linhas da tabela
   async function carregarSolicitacoes() {
     try {
       const res = await fetch(`${API_URL}/rh/solicitacoes`);
@@ -176,6 +182,7 @@
 
       msgVazia.style.display = 'none';
 
+      // Constrói dinamicamente as linhas da tabela com os dados retornados
       dados.forEach(item => {
         const linha = document.createElement('tr');
         const dataFormatada = new Date(item.data_solicitacao).toLocaleString('pt-BR');
@@ -197,6 +204,7 @@
     }
   }
 
+  // Reseta a senha do usuário selecionado para o padrão ('senai123') e recarrega a tabela
   async function resetarSenha(email, idSolicitacao) {
     if (!confirm(`Deseja redefinir a senha do usuario ${email} para 'senai123'?`)) return;
 
@@ -215,6 +223,7 @@
     }
   }
 
+  // Dispara um comunicado do RH que será resgatado pelo App no próximo polling do usuário
   async function enviarNotificacao() {
     const email = document.getElementById('notif-email').value;
     const titulo = document.getElementById('notif-titulo').value;
@@ -236,6 +245,7 @@
 
       if (res.ok) {
         alert(dados.message);
+        // Limpa os campos do formulário após o sucesso
         document.getElementById('notif-email').value = '';
         document.getElementById('notif-titulo').value = '';
         document.getElementById('notif-mensagem').value = '';
@@ -248,6 +258,7 @@
     }
   }
 
+  // Inicializa o carregamento das solicitações ao abrir a página
   carregarSolicitacoes();
 </script>
 </body>
