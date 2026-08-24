@@ -8,13 +8,10 @@ const app = express();
 // MIDDLEWARES GLOBAIS
 // =========================================================
 
-// Habilita o CORS para permitir requisições do aplicativo mobile/web
+// Habilita o CORS para permitir requisições de diferentes origens (web e mobile)
 app.use(cors());
 
-// NOTA DE MANUTENÇÃO: Não adicione 'app.use(express.json())' aqui no Gateway!
-// Isso corrompe o corpo (body) de requisições repassadas via proxy e uploads de arquivos.
-
-// Middleware de log: exibe no terminal do Gateway todas as requisições que chegam
+// Middleware para registrar no terminal o método e a URL de cada requisição recebida
 app.use((req, res, next) => {
   console.log(`[GATEWAY 3000] Recebeu chamada: ${req.method} ${req.url}`);
   next();
@@ -24,33 +21,36 @@ app.use((req, res, next) => {
 // REGRAS DE ROTEAMENTO (PROXY REVERSO)
 // =========================================================
 
-// Endereço do servidor backend principal (Altere aqui se a porta/IP do backend mudar)
-const BACKEND_URL = 'http://localhost:3003';
+// Endereço base do servidor backend central
+const BACKEND_URL = 'http://127.0.0.1:3003';
 
-// 1. Mapeamento de Autenticação e Recuperação de Senha
-// Entrada:  http://IP:3000/api/auth/login
-// Saída:    http://localhost:3003/login
+// Tratador genérico para capturar erros de conexão entre o Gateway e o backend
+const onError = (servico) => (err, req, res) => {
+  console.error(`[GATEWAY ERRO ${servico}]`, err.message);
+  res.status(502).json({ error: `Falha na comunicação com o backend (${servico}).` });
+};
+
+// Redireciona chamadas com prefixo /api/auth removendo o trecho da URL antes de enviar ao backend
 app.use('/api/auth', createProxyMiddleware({ 
-    target: BACKEND_URL, 
-    changeOrigin: true,
-    pathRewrite: { '^/api/auth': '' }, // Remove o prefixo '/api/auth' antes de repassar
-    onError: (err, req, res) => {
-      console.error('[GATEWAY ERRO AUTH]', err.message);
-      res.status(502).json({ error: 'Gateway não conseguiu se comunicar com o serviço na porta 3003.' });
-    }
+  target: BACKEND_URL, 
+  changeOrigin: true,
+  pathRewrite: { '^/api/auth': '' }, 
+  onError: onError('AUTH')
 }));
 
-// 2. Mapeamento de Perfil e Gerenciamento de Usuários
-// Entrada:  http://IP:3000/api/perfil/usuarios/1
-// Saída:    http://localhost:3003/usuarios/1
+// Redireciona chamadas com prefixo /api/perfil removendo o trecho da URL antes de enviar ao backend
 app.use('/api/perfil', createProxyMiddleware({ 
-    target: BACKEND_URL, 
-    changeOrigin: true,
-    pathRewrite: { '^/api/perfil': '' }, // Remove o prefixo '/api/perfil' antes de repassar
-    onError: (err, req, res) => {
-      console.error('[GATEWAY ERRO PERFIL]', err.message);
-      res.status(502).json({ error: 'Gateway não conseguiu se comunicar com o serviço na porta 3003.' });
-    }
+  target: BACKEND_URL, 
+  changeOrigin: true,
+  pathRewrite: { '^/api/perfil': '' },
+  onError: onError('PERFIL')
+}));
+
+// Proxy coringa: repassa qualquer outra rota (/produtos, /rh/solicitacoes, etc.) sem alterar a URL original
+app.use(createProxyMiddleware({ 
+  target: BACKEND_URL, 
+  changeOrigin: true,
+  onError: onError('GERAL')
 }));
 
 // =========================================================
@@ -59,5 +59,5 @@ app.use('/api/perfil', createProxyMiddleware({
 
 const PORT = 3000;
 app.listen(PORT, () => {
-    console.log(`🚀 API Gateway (Portaria InfoEstoque) rodando na porta ${PORT}`);
+  console.log(`🚀 API Gateway (Portaria InfoEstoque) rodando na porta ${PORT}`);
 });

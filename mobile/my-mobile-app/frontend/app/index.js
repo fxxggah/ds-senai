@@ -58,9 +58,11 @@ export default function TelaLogin() {
 
       const usuario = resposta.data.usuario;
 
-      // Salva o ID do usuário no armazenamento local para manter a sessão
       if (usuario?.id) {
         await AsyncStorage.setItem('usuarioId', String(usuario.id));
+      }
+      if (usuario?.email) {
+        await AsyncStorage.setItem('usuarioEmail', usuario.email);
       }
 
       const nomeUsuario = usuario?.nome || email;
@@ -134,7 +136,7 @@ export default function TelaLogin() {
           <Text style={styles.linkEsqueceuSenha}>Esqueceu a senha?</Text>
         </TouchableOpacity>
         
-        {/* Botão de Entrar (Desabilitado se estiver sem rede ou carregando) */}
+        {/* Botão de Entrar */}
         <TouchableOpacity 
           style={[
             styles.botao, 

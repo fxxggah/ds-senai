@@ -28,16 +28,18 @@ app.use((req, res, next) => {
 // ROTAS DE RECUPERAÇÃO DE SENHA E PAINEL RH
 // =========================================================
 
-// Registra pedido de recuperação de senha enviado pelo app mobile
+// Registra no banco uma nova solicitação de redefinição de senha feita pelo app móvel
 app.post('/recuperar', async (req, res) => {
   const { email } = req.body;
 
   try {
+    // Verifica se o e-mail corporativo fornecido existe no sistema
     const [user] = await db.query('SELECT * FROM usuarios WHERE email = ?', [email]);
     if (user.length === 0) {
       return res.status(404).json({ error: 'E-mail corporativo não encontrado.' });
     }
 
+    // Cria a solicitação com status padrão pendente
     await db.query('INSERT INTO solicitacoes_senha (email) VALUES (?)', [email]);
     
     console.log(`[RH] Solicitação de senha registrada para: ${email}`);
@@ -48,7 +50,7 @@ app.post('/recuperar', async (req, res) => {
   }
 });
 
-// Busca todas as solicitações pendentes para o painel de administração do RH (Web)
+// Retorna todas as solicitações de senha não resolvidas para exibição na tabela do Painel Web do RH
 app.get('/rh/solicitacoes', async (req, res) => {
   try {
     const [solicitacoes] = await db.query(
@@ -61,12 +63,13 @@ app.get('/rh/solicitacoes', async (req, res) => {
   }
 });
 
-// Reseta a senha do usuário no banco para o valor padrão 'senai123' e marca o chamado como resolvido
+// Reseta a senha do usuário para o padrão 'senai123' e encerra o chamado no painel do RH
 app.put('/rh/resetar-senha', async (req, res) => {
   const { email, idSolicitacao } = req.body;
   const SENHA_PADRAO = 'senai123';
 
   try {
+    // Atualiza a credencial do usuário e o status do pedido
     await db.query('UPDATE usuarios SET senha = ? WHERE email = ?', [SENHA_PADRAO, email]);
     await db.query("UPDATE solicitacoes_senha SET status = 'RESOLVIDO' WHERE id = ?", [idSolicitacao]);
 
@@ -82,10 +85,11 @@ app.put('/rh/resetar-senha', async (req, res) => {
 // ROTAS DE AUTENTICAÇÃO E GESTÃO DE USUÁRIOS
 // =========================================================
 
-// Criação de novos usuários/funcionários
+// Insere um novo operador/funcionário no banco de dados
 app.post('/cadastro', async (req, res) => {
   const { nome, email, senha, setor } = req.body;
 
+  // Validação dos campos essenciais do formulário
   if (!nome || !email || !senha) {
     return res.status(400).json({ error: "Nome, e-mail e senha são obrigatórios!" });
   }
@@ -99,6 +103,7 @@ app.post('/cadastro', async (req, res) => {
 
   } catch (erro) {
     console.error(erro);
+    // Trata tentativa de duplicar e-mail já existente (restrição UNIQUE no MySQL)
     if (erro.code === 'ER_DUP_ENTRY') {
       return res.status(400).json({ error: "Este e-mail já está cadastrado no sistema." });
     }
@@ -106,7 +111,7 @@ app.post('/cadastro', async (req, res) => {
   }
 });
 
-// Autenticação de usuários no app mobile
+// Autentica as credenciais de acesso para liberar a entrada no app móvel
 app.post('/login', async (req, res) => {
   console.log('[AUTH] Dados recebidos para login:', req.body);
   const { email, senha } = req.body;
@@ -123,6 +128,7 @@ app.post('/login', async (req, res) => {
       const usuarioEncontrado = linhas[0];
       console.log(`[AUTH] Login aprovado para: ${usuarioEncontrado.email}`);
       
+      // Retorna os dados básicos do operador para gravação em sessão no app
       res.status(200).json({
         message: "Login aprovado",
         usuario: {
@@ -142,7 +148,7 @@ app.post('/login', async (req, res) => {
   }
 });
 
-// Busca dados detalhados do perfil e converte a imagem (BLOB) para Base64 para exibição no Expo
+// Consulta o perfil do usuário pelo ID e converte a foto em formato BLOB para Base64
 app.get('/usuarios/:id', async (req, res) => {
   const { id } = req.params;
 
@@ -155,6 +161,7 @@ app.get('/usuarios/:id', async (req, res) => {
     }
 
     const usuario = linhas[0];
+    // Formata o arquivo binário da imagem para exibição direta no componente do React Native
     if (usuario.foto) {
       usuario.foto = usuario.foto.toString('base64');
     }
@@ -166,7 +173,7 @@ app.get('/usuarios/:id', async (req, res) => {
   }
 });
 
-// Upload e atualização da foto de perfil (crachá)
+// Recebe um arquivo de foto enviado no formulário e grava o buffer no banco de dados
 app.patch('/usuarios/:id/foto', upload.single('foto'), async (req, res) => {
   try {
       const fotoBuffer = req.file ? req.file.buffer : null;
@@ -183,7 +190,7 @@ app.patch('/usuarios/:id/foto', upload.single('foto'), async (req, res) => {
   }
 });
 
-// Exclusão definitiva de conta de usuário
+// Remove o registro do usuário do banco de dados pelo seu ID
 app.delete('/usuarios/:id', async (req, res) => {
   try {
       await db.query('DELETE FROM usuarios WHERE id = ?', [req.params.id]);
@@ -194,7 +201,7 @@ app.delete('/usuarios/:id', async (req, res) => {
   }
 });
 
-// Atualização dos dados de trabalho (setor e turno) do operador
+// Atualiza informações profissionais do operador (setor e turno de trabalho)
 app.put('/usuarios/:id', async (req, res) => {
   const { setor, turno } = req.body;
   
@@ -214,7 +221,7 @@ app.put('/usuarios/:id', async (req, res) => {
 // ROTAS DE PRODUTOS E SUPORTE
 // =========================================================
 
-// Listagem de produtos no estoque
+// Retorna a lista de itens armazenados no estoque
 app.get('/produtos', async (req, res) => {
   try {
     const [produtos] = await db.query('SELECT * FROM produtos');
@@ -225,7 +232,7 @@ app.get('/produtos', async (req, res) => {
   }
 });
 
-// Cadastro de novo produto no estoque
+// Registra um novo produto na tabela do inventário
 app.post('/produtos', async (req, res) => {
   const { nome, categoria, quantidade, preco } = req.body;
 
@@ -252,7 +259,7 @@ app.post('/produtos', async (req, res) => {
   }
 });
 
-// Remoção de produto por ID
+// Exclui um produto do inventário pelo seu ID
 app.delete('/produtos/:id', async (req, res) => {
   const { id } = req.params;
 
@@ -270,7 +277,7 @@ app.delete('/produtos/:id', async (req, res) => {
   }
 });
 
-// Abertura de chamados de suporte técnico
+// Salva solicitações de suporte ou relatórios de incidentes enviados pelo aplicativo
 app.post('/suporte', async (req, res) => {
   const { operador, setor, descricao } = req.body;
   
@@ -286,6 +293,52 @@ app.post('/suporte', async (req, res) => {
     res.status(201).json({ message: "Chamado registrado." });
   } catch (erro) {
     res.status(500).json({ error: "Erro ao registrar o chamado." });
+  }
+});
+
+// =========================================================
+// ROTAS DE NOTIFICAÇÕES RH (AULA 9)
+// =========================================================
+
+// Registra um comunicado do RH direcionado ao e-mail de um usuário específico
+app.post('/rh/enviar-notificacao', async (req, res) => {
+  const { email, titulo, mensagem } = req.body;
+  try {
+    // Confirma se o e-mail informado pertence a um usuário válido
+    const [user] = await db.query('SELECT id FROM usuarios WHERE email = ?', [email]);
+    if (user.length === 0) return res.status(404).json({ error: 'Usuario não encontrado.' });
+    
+    // Cadastra o aviso com o status inicial 'PENDENTE'
+    await db.query(
+      'INSERT INTO notificacoes_rh (email_usuario, titulo, mensagem) VALUES (?, ?, ?)',
+      [email, titulo, mensagem]
+    );
+    res.status(200).json({ message: 'Notificação enviada com sucesso!' });
+  } catch (erro) {
+    res.status(500).json({ error: 'Erro ao registrar notificação.' });
+  }
+});
+
+// Verifica se há mensagens pendentes para o operador e atualiza para 'LIDO' logo após a entrega
+app.get('/notificacoes/checar/:email', async (req, res) => {
+  const { email } = req.params;
+  try {
+    // Busca o comunicado pendente mais recente do usuário
+    const [notificacoes] = await db.query(
+      "SELECT * FROM notificacoes_rh WHERE email_usuario = ? AND status = 'PENDENTE' ORDER BY id DESC LIMIT 1",
+      [email]
+    );
+
+    if (notificacoes.length > 0) {
+      const aviso = notificacoes[0];
+      // Marca o comunicado como lido para não disparar novamente a mesma notificação
+      await db.query("UPDATE notificacoes_rh SET status = 'LIDO' WHERE id = ?", [aviso.id]);
+      return res.json({ temNotificacao: true, titulo: aviso.titulo, mensagem: aviso.mensagem });
+    }
+
+    res.json({ temNotificacao: false });
+  } catch (erro) {
+    res.status(500).json({ error: 'Erro ao buscar notificações.' });
   }
 });
 
