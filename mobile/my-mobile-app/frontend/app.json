@@ -14,14 +14,18 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.senai.estoqueinfo",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "backgroundColor": "#003366"
       },
-      "edgeToEdgeEnabled": true
+      "package": "com.senai.estoqueinfo"
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -29,6 +33,19 @@
     "plugins": [
       "expo-router",
       "expo-font"
-    ]
+    ],
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "121fc012-f0f0-4bfe-b49f-2dee63d5d8a4"
+      }
+    },
+    "owner": "fxxggah",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/121fc012-f0f0-4bfe-b49f-2dee63d5d8a4"
+    }
   }
 }
