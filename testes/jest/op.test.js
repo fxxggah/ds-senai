@@ -26,11 +26,11 @@ test('throws an error when dividing by 0', () => {
 });
 
 // PORCENTAGEM
-test('PORCENTAGEM', () => { 
+test('calculates 20% of 100 to equal 20', () => {
   expect(por(100, 20)).toBe(20)
 });
 
 // MODULO
-test('MODULO', () => { 
+test('returns the remainder of 100 divided by 2 to equal 0', () => {
   expect(mod(100, 2)).toBe(0)
 });
