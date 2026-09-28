@@ -5,7 +5,6 @@ test('adds 50 + 50 to equal 100', () => {
   expect(sum(50, 50)).toBe(100)
 });
 
-
 // SUBTRAÇÃO
 test('substracts 100 - 0 to equal 100', () => {
   expect(sub(100, 0)).toBe(100)
