@@ -1,0 +1,9 @@
+# Ignorar qualquer pasta node_modules em QUALQUER subdiretório
+node_modules/
+**/node_modules/
+
+# Sistema e Build
+.DS_Store
+dist/
+build/
+.vite/
