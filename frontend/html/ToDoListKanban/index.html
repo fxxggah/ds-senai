@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kanban SENAI — Workspace</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <!-- Fundo dinâmico para efeito Liquid Glass -->
+    <div class="glass-background">
+        <div class="glow-orb orb-1"></div>
+        <div class="glow-orb orb-2"></div>
+        <div class="glow-orb orb-3"></div>
+    </div>
+
+    <header class="app-header">
+        <div class="brand">
+            <span class="brand-badge">SENAI</span>
+            <h1>Kanban de Produção</h1>
+        </div>
+    </header>
+
+    <main class="app-container">
+        <!-- Formulário de Adicionar Tarefa -->
+        <section class="task-form-card">
+            <h2>Criar Nova Tarefa</h2>
+            <form id="addTaskForm">
+                <div class="input-wrapper">
+                    <input type="text" id="taskTitle" placeholder="Ex: Criar endpoints de login..." required autocomplete="off">
+                </div>
+                <button type="submit" class="btn-primary">
+                    <span>Adicionar</span>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+                </button>
+            </form>
+        </section>
+
+        <!-- Board do Kanban -->
+        <section class="kanban-board">
+            <div class="column">
+                <div class="column-header">
+                    <h2>A Fazer</h2>
+                    <span class="task-counter" id="count_fazer">0</span>
+                </div>
+                <div class="column-body" id="coluna_fazer"></div>
+            </div>
+
+            <div class="column">
+                <div class="column-header">
+                    <h2>Em Andamento</h2>
+                    <span class="task-counter" id="count_andamento">0</span>
+                </div>
+                <div class="column-body" id="coluna_andamento"></div>
+            </div>
+
+            <div class="column">
+                <div class="column-header">
+                    <h2>Concluído</h2>
+                    <span class="task-counter" id="count_concluido">0</span>
+                </div>
+                <div class="column-body" id="coluna_concluido"></div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        const addTaskForm = document.getElementById('addTaskForm');
+        const taskTitle = document.getElementById('taskTitle');
+
+        const colFazer = document.getElementById('coluna_fazer');
+        const colAndamento = document.getElementById('coluna_andamento');
+        const colConcluido = document.getElementById('coluna_concluido');
+
+        addTaskForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+            adicionarTarefa();
+        });
+
+        function atualizarContadores() {
+            document.getElementById('count_fazer').textContent = colFazer.children.length;
+            document.getElementById('count_andamento').textContent = colAndamento.children.length;
+            document.getElementById('count_concluido').textContent = colConcluido.children.length;
+        }
+
+        function adicionarTarefa() {
+            const texto = taskTitle.value.trim();
+            if (!texto) return;
+
+            const card = document.createElement('div');
+            card.className = 'card';
+
+            const paragrafo = document.createElement('p');
+            paragrafo.textContent = texto;
+
+            const divAcoes = document.createElement('div');
+            divAcoes.className = 'acoes';
+
+            const btnAvancar = document.createElement('button');
+            btnAvancar.className = 'btn-action btn-move';
+            btnAvancar.innerHTML = `Mover <span>→</span>`;
+
+            const btnExcluir = document.createElement('button');
+            btnExcluir.className = 'btn-action btn-delete';
+            btnExcluir.innerHTML = `Excluir`;
+
+            btnAvancar.onclick = function () {
+                moverParaFrente(card, btnAvancar);
+                atualizarContadores();
+            };
+
+            btnExcluir.onclick = function () {
+                card.style.opacity = '0';
+                card.style.transform = 'scale(0.9)';
+                setTimeout(() => {
+                    card.remove();
+                    atualizarContadores();
+                }, 150);
+            };
+
+            divAcoes.appendChild(btnAvancar);
+            divAcoes.appendChild(btnExcluir);
+            card.appendChild(paragrafo);
+            card.appendChild(divAcoes);
+
+            colFazer.appendChild(card);
+            taskTitle.value = '';
+            atualizarContadores();
+        }
+
+        function moverParaFrente(card, botao) {
+            const colunaAtual = card.parentElement;
+
+            if (colunaAtual.id === 'coluna_fazer') {
+                colAndamento.appendChild(card);
+            } else if (colunaAtual.id === 'coluna_andamento') {
+                colConcluido.appendChild(card);
+                botao.style.display = 'none';
+            }
+        }
+    </script>
+</body>
+
+</html>
